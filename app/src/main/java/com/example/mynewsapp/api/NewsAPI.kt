@@ -9,7 +9,7 @@ import retrofit2.http.Query
 interface NewsAPI {
 
     @GET("v2/everything")
-    fun getNews(
+    suspend fun searchForNews(
         @Query("q")
         stockName:String = "台積電",
         @Query("page")
@@ -17,4 +17,17 @@ interface NewsAPI {
         @Query("apiKey")
         apiKey:String = API_KEY
     ):Response<NewsResponse>
+
+    @GET("v2/top-headlines")
+    suspend fun getHeadlines(
+        @Query("country")
+        country:String = "tw",
+        @Query("category")
+        category: String = "business",
+        @Query("page")
+        page:Int=1,
+        @Query("apiKey")
+        apiKey:String = API_KEY
+    ):Response<NewsResponse>
+
 }
