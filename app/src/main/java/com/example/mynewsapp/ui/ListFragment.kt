@@ -58,6 +58,12 @@ class ListFragment : Fragment() {
             }
 
         })
+
+        binding.floatingBtn.setOnClickListener {
+            val dialog = CustomDialogFragment()
+
+            dialog.show(parentFragmentManager,"stock")
+        }
     }
     private fun hideProgressbar(){
         binding.paginationProgressBar.visibility = View.INVISIBLE

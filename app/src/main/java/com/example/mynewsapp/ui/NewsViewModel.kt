@@ -1,6 +1,7 @@
 package com.example.mynewsapp.ui
 
 import NewsResponse
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -10,12 +11,13 @@ import com.example.mynewsapp.repository.NewsRepository
 import com.example.mynewsapp.util.Resource
 import kotlinx.coroutines.launch
 import retrofit2.Response
+import java.lang.Exception
 
 class NewsViewModel(val newsRepository: NewsRepository):ViewModel() {
     var page = 1
     val news:MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
     val stockPriceInfo: MutableLiveData<Resource<StockPriceInfoResponse>> = MutableLiveData()
-    val stockList = mutableListOf("2330","0050")
+    val stockList = mutableSetOf("2330","0050")
     init {
         getHeadlines()
         getStockPriceInfo()
@@ -58,6 +60,16 @@ class NewsViewModel(val newsRepository: NewsRepository):ViewModel() {
             }
         }
         return Resource.Error(response.message())
+    }
+
+    fun addToStockList(stockNo:String){
+        stockList.add(stockNo)
+        Log.d("stocklist",stockList.toString())
+        try {
+            getStockPriceInfo()
+        }catch (e:Exception){
+            Log.e("viewmodel error",e.toString())
+        }
     }
 }
 

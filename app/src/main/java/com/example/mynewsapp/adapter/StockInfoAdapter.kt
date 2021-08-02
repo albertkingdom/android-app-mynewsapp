@@ -41,14 +41,21 @@ class StockInfoAdapter:ListAdapter<MsgArray, StockInfoAdapter.StockViewHolder>(D
         ItemStockinfoBinding.bind(holder.itemView).apply {
             stockNo.text = currentStock.c
             stockName.text = currentStock.n
-            stockPrice.text = String.format("%.2f",currentStock.z.toFloat())
-            val diff = currentStock.z.toFloat() - currentStock.y.toFloat()
+            stockPrice.text = String.format("%.2f",handleStockPrice(currentStock).toFloat())
+            val diff = handleStockPrice(currentStock).toFloat() - currentStock.y.toFloat()
             stockPriceDiff.text = String.format("%.2f", diff)
             if(diff<0f){
                 stockPriceDiff.setBackgroundResource(R.color.teal_700)
             }
         }
 
+    }
+    private fun handleStockPrice(currentStock:MsgArray):String{
+        return if(currentStock.z == "-"){
+            currentStock.y
+        }else{
+            currentStock.z
+        }
     }
 
 }

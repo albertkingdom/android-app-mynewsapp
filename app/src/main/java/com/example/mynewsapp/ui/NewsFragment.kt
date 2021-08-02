@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mynewsapp.MainActivity
 import com.example.mynewsapp.R
@@ -28,6 +29,10 @@ class NewsFragment : Fragment(R.layout.fragment_news) {
         val recyclerView: RecyclerView = binding!!.newsRecyclerview
 
         newsAdapter = NewsAdapter()
+        newsAdapter.setClickListener{
+            val action = NewsFragmentDirections.actionNewsFragmentToNewsArticleFragment(it)
+            findNavController().navigate(action)
+        }
         recyclerView.adapter = newsAdapter
 
         viewModel = (activity as MainActivity).viewModel
