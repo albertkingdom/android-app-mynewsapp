@@ -3,6 +3,7 @@ package com.example.mynewsapp.ui
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
@@ -23,7 +24,8 @@ class NewsFragment : Fragment(R.layout.fragment_news) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        //change toolbar title
+        (requireActivity() as AppCompatActivity).supportActionBar?.title = "News"
         binding = FragmentNewsBinding.bind(view)
 
         val recyclerView: RecyclerView = binding!!.newsRecyclerview

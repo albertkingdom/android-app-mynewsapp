@@ -1,9 +1,12 @@
 package com.example.mynewsapp.adapter
 
+
+
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.res.ResourcesCompat.getColor
+
 
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -43,9 +46,15 @@ class StockInfoAdapter(val onClick: (Stock:MsgArray)->Unit):ListAdapter<MsgArray
             stockName.text = currentStock.n
             stockPrice.text = String.format("%.2f",handleStockPrice(currentStock).toFloat())
             val diff = handleStockPrice(currentStock).toFloat() - currentStock.y.toFloat()
-            stockPriceDiff.text = String.format("%.2f", diff)
+
             if(diff<0f){
-                stockPriceDiff.setBackgroundResource(R.color.teal_700)
+                stockPriceDiff.setBackgroundResource(R.color.green)
+                stockPriceDiff.text = holder.itemView.context.getString(R.string.stockprice_diff,"",String.format("%.2f", diff))
+
+            }
+            if(diff>0f) {
+                stockPriceDiff.setBackgroundResource(R.color.red)
+                stockPriceDiff.text = holder.itemView.context.getString(R.string.stockprice_diff,"+",String.format("%.2f", diff))
             }
 
             root.setOnClickListener { it ->

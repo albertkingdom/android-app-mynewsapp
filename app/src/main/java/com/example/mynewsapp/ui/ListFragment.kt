@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
@@ -34,7 +35,8 @@ class ListFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val recyclerView: RecyclerView = binding.stockListRecyclerview
-
+        //change toolbar title
+        (requireActivity() as AppCompatActivity).supportActionBar?.title = "List"
         viewModel =(activity as MainActivity).viewModel
 
         stockAdapter = StockInfoAdapter(getStockNameToGetRelatedNews)

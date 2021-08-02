@@ -17,8 +17,8 @@
     <fragment
         android:id="@+id/newsFragment"
         android:name="com.example.mynewsapp.ui.NewsFragment"
-        android:label="fragment_news"
-        tools:layout="@layout/fragment_news" >
+        android:label="News"
+        tools:layout="@layout/fragment_news">
         <action
             android:id="@+id/action_newsFragment_to_newsArticleFragment"
             app:destination="@id/newsArticleFragment" />
@@ -26,8 +26,7 @@
     <fragment
         android:id="@+id/newsArticleFragment"
         android:name="com.example.mynewsapp.ui.NewsArticleFragment"
-        android:label="fragment_news_article"
-        tools:layout="@layout/fragment_news_article" >
+        tools:layout="@layout/fragment_news_article">
         <argument
             android:name="article"
             app:argType="Article" />
