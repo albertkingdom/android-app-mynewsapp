@@ -7,8 +7,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mynewsapp.MainActivity
+import com.example.mynewsapp.MsgArray
 import com.example.mynewsapp.adapter.StockInfoAdapter
 import com.example.mynewsapp.databinding.FragmentListBinding
 import com.example.mynewsapp.util.Resource
@@ -35,7 +37,7 @@ class ListFragment : Fragment() {
 
         viewModel =(activity as MainActivity).viewModel
 
-        stockAdapter = StockInfoAdapter()
+        stockAdapter = StockInfoAdapter(getStockNameToGetRelatedNews)
         recyclerView.adapter = stockAdapter
 
         viewModel.stockPriceInfo.observe(viewLifecycleOwner, Observer { response ->
@@ -70,5 +72,12 @@ class ListFragment : Fragment() {
     }
     private fun showProgressbar(){
         binding.paginationProgressBar.visibility = View.VISIBLE
+    }
+
+    private val getStockNameToGetRelatedNews:(stockContent:MsgArray)->Unit = { stockContent->
+
+        val stockName = stockContent.n
+        viewModel.getRelatedNews(stockName)
+        findNavController().navigate(ListFragmentDirections.actionListFragmentToNewsFragment())
     }
 }

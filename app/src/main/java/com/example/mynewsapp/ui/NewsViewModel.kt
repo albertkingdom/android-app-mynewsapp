@@ -42,6 +42,15 @@ class NewsViewModel(val newsRepository: NewsRepository):ViewModel() {
         }
     }
 
+    fun getRelatedNews(stockName:String){
+
+        viewModelScope.launch {
+            news.postValue(Resource.Loading())
+            val response = newsRepository.searchNews(stockName = stockName,page = page)
+            news.postValue(handleNewsResponse(response))
+        }
+    }
+    //get news headlines
     private fun handleNewsResponse(response: Response<NewsResponse>): Resource<NewsResponse>{
         if (response.isSuccessful){
             response.body()?.let {
@@ -51,7 +60,7 @@ class NewsViewModel(val newsRepository: NewsRepository):ViewModel() {
         }
         return Resource.Error(response.message())
     }
-
+    //get stockprice
     private fun handleStockPriceInfoResponse(response: Response<StockPriceInfoResponse>): Resource<StockPriceInfoResponse>{
         if (response.isSuccessful){
             response.body()?.let {

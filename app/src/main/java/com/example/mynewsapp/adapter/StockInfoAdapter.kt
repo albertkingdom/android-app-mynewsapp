@@ -13,7 +13,7 @@ import com.example.mynewsapp.R
 import com.example.mynewsapp.databinding.ItemStockinfoBinding
 
 
-class StockInfoAdapter:ListAdapter<MsgArray, StockInfoAdapter.StockViewHolder>(DiffCallback) {
+class StockInfoAdapter(val onClick: (Stock:MsgArray)->Unit):ListAdapter<MsgArray, StockInfoAdapter.StockViewHolder>(DiffCallback) {
     companion object {
         private val DiffCallback = object : DiffUtil.ItemCallback<MsgArray>(){
             override fun areItemsTheSame(oldItem: MsgArray, newItem: MsgArray): Boolean {
@@ -47,7 +47,12 @@ class StockInfoAdapter:ListAdapter<MsgArray, StockInfoAdapter.StockViewHolder>(D
             if(diff<0f){
                 stockPriceDiff.setBackgroundResource(R.color.teal_700)
             }
+
+            root.setOnClickListener { it ->
+                onClick(currentStock)
+            }
         }
+
 
     }
     private fun handleStockPrice(currentStock:MsgArray):String{
