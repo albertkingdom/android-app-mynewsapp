@@ -27,4 +27,8 @@ class NewsRepository(val stockDao: StockDao) {
     suspend fun insert(stock:Stock){
         stockDao.insert(stock = stock)
     }
+
+    suspend fun delStock(stockNo:String){
+        stockDao.delete(stockNo)
+    }
 }

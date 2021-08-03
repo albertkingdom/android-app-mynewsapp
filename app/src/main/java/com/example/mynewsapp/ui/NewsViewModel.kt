@@ -79,6 +79,12 @@ class NewsViewModel(val newsRepository: NewsRepository):ViewModel() {
         }
 
     }
+
+    fun deleteStock(stockNo:String){
+        viewModelScope.launch {
+            newsRepository.delStock(stockNo)
+        }
+    }
 }
 
 class NewsViewModelProviderFactory(val newsRepository: NewsRepository): ViewModelProvider.Factory{

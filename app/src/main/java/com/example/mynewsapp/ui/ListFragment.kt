@@ -9,12 +9,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mynewsapp.MainActivity
-import com.example.mynewsapp.model.MsgArray
 import com.example.mynewsapp.adapter.StockInfoAdapter
 import com.example.mynewsapp.databinding.FragmentListBinding
+import com.example.mynewsapp.db.Stock
+import com.example.mynewsapp.model.MsgArray
 import com.example.mynewsapp.util.Resource
+import com.google.android.material.snackbar.Snackbar
+import java.util.*
 
 class ListFragment : Fragment() {
     private lateinit var binding: FragmentListBinding
@@ -83,6 +87,28 @@ class ListFragment : Fragment() {
 
             dialog.show(parentFragmentManager,"stock")
         }
+
+        /**
+         * swipe to delete a stockNo from db
+         */
+        ItemTouchHelper(object: ItemTouchHelper.SimpleCallback(0,ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT){
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean {
+                return false
+            }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+
+                val currentStockItem = stockAdapter.currentList[viewHolder.adapterPosition]
+
+                viewModel.deleteStock(currentStockItem.c)
+                Snackbar.make(view, "追蹤股票代號已刪除",Snackbar.LENGTH_LONG).show()
+            }
+
+        }).attachToRecyclerView(recyclerView)
     }
     private fun hideProgressbar(){
         binding.paginationProgressBar.visibility = View.INVISIBLE

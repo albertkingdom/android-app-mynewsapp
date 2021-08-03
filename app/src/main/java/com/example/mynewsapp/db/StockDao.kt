@@ -13,6 +13,6 @@ interface StockDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(stock:Stock)
 
-    @Delete
-    suspend fun delete(stock:Stock)
+    @Query("DELETE FROM stockList WHERE stockNo = :stockNumberToDel")
+    suspend fun delete(stockNumberToDel:String)
 }
