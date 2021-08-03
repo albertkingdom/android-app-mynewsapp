@@ -29,6 +29,6 @@
         tools:layout="@layout/fragment_news_article">
         <argument
             android:name="article"
-            app:argType="Article" />
+            app:argType="com.example.mynewsapp.model.Article" />
     </fragment>
 </navigation>

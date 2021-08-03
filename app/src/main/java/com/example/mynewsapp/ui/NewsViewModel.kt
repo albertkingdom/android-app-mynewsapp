@@ -1,27 +1,26 @@
 package com.example.mynewsapp.ui
 
-import NewsResponse
-import android.util.Log
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
-import com.example.mynewsapp.StockPriceInfoResponse
+import com.example.mynewsapp.model.NewsResponse
+import androidx.lifecycle.*
+import com.example.mynewsapp.model.StockPriceInfoResponse
+import com.example.mynewsapp.db.Stock
 import com.example.mynewsapp.repository.NewsRepository
 import com.example.mynewsapp.util.Resource
 import kotlinx.coroutines.launch
 import retrofit2.Response
-import java.lang.Exception
 
 class NewsViewModel(val newsRepository: NewsRepository):ViewModel() {
     var page = 1
     val news:MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
     val stockPriceInfo: MutableLiveData<Resource<StockPriceInfoResponse>> = MutableLiveData()
-    val stockList = mutableSetOf("2330","0050")
+    //val stockList = mutableSetOf("2330","0050")
+
+    val allStocksFromdb: LiveData<List<Stock>> = newsRepository.allstocks.asLiveData()
     init {
         getHeadlines()
-        getStockPriceInfo()
     }
+
+
     fun getHeadlines(){
 
         viewModelScope.launch {
@@ -31,9 +30,11 @@ class NewsViewModel(val newsRepository: NewsRepository):ViewModel() {
         }
     }
 
-    fun getStockPriceInfo(){
+    fun getStockPriceInfo(stockList: List<String>){
+
         viewModelScope.launch {
             stockPriceInfo.postValue(Resource.Loading())
+
             val stockListString:String = stockList.joinToString("|") {
                 "tse_${it}.tw"
             }
@@ -72,13 +73,11 @@ class NewsViewModel(val newsRepository: NewsRepository):ViewModel() {
     }
 
     fun addToStockList(stockNo:String){
-        stockList.add(stockNo)
-        Log.d("stocklist",stockList.toString())
-        try {
-            getStockPriceInfo()
-        }catch (e:Exception){
-            Log.e("viewmodel error",e.toString())
+
+        viewModelScope.launch {
+            newsRepository.insert(stock = Stock(0,stockNo))
         }
+
     }
 }
 

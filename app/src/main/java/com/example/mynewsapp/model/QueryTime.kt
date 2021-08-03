@@ -1,8 +1,8 @@
-package com.example.mynewsapp
+package com.example.mynewsapp.model
 
 data class QueryTime(
-    val sessionFromTime: Int,
-    val sessionLatestTime: Int,
+    val sessionFromTime: Long,
+    val sessionLatestTime: Long,
     val sessionStr: String,
     val showChart: Boolean,
     val stockInfo: Int,

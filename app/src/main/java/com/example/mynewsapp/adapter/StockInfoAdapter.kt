@@ -2,21 +2,20 @@ package com.example.mynewsapp.adapter
 
 
 
+
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.res.ResourcesCompat.getColor
-
-
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.example.mynewsapp.MsgArray
+import com.example.mynewsapp.model.MsgArray
 import com.example.mynewsapp.R
 import com.example.mynewsapp.databinding.ItemStockinfoBinding
 
 
-class StockInfoAdapter(val onClick: (Stock:MsgArray)->Unit):ListAdapter<MsgArray, StockInfoAdapter.StockViewHolder>(DiffCallback) {
+class StockInfoAdapter(val onClick: (Stock: MsgArray)->Unit):ListAdapter<MsgArray, StockInfoAdapter.StockViewHolder>(DiffCallback) {
     companion object {
         private val DiffCallback = object : DiffUtil.ItemCallback<MsgArray>(){
             override fun areItemsTheSame(oldItem: MsgArray, newItem: MsgArray): Boolean {
@@ -47,14 +46,29 @@ class StockInfoAdapter(val onClick: (Stock:MsgArray)->Unit):ListAdapter<MsgArray
             stockPrice.text = String.format("%.2f",handleStockPrice(currentStock).toFloat())
             val diff = handleStockPrice(currentStock).toFloat() - currentStock.y.toFloat()
 
-            if(diff<0f){
-                stockPriceDiff.setBackgroundResource(R.color.green)
-                stockPriceDiff.text = holder.itemView.context.getString(R.string.stockprice_diff,"",String.format("%.2f", diff))
 
-            }
-            if(diff>0f) {
+            if(diff<0f) {
+                stockPriceDiff.setBackgroundResource(R.color.green)
+                stockPriceDiff.text = holder.itemView.context.getString(
+                    R.string.stockprice_diff,
+                    "",
+                    String.format("%.2f", diff)
+                )
+            }else if(diff>0f) {
                 stockPriceDiff.setBackgroundResource(R.color.red)
-                stockPriceDiff.text = holder.itemView.context.getString(R.string.stockprice_diff,"+",String.format("%.2f", diff))
+                stockPriceDiff.text = holder.itemView.context.getString(
+                    R.string.stockprice_diff,
+                    "+",
+                    String.format("%.2f", diff)
+                )
+            }else{
+                stockPriceDiff.setBackgroundResource(R.color.white)
+                stockPriceDiff.setTextColor(Color.GRAY)
+                stockPriceDiff.text = holder.itemView.context.getString(
+                    R.string.stockprice_diff,
+                    "",
+                    "0.00"
+                )
             }
 
             root.setOnClickListener { it ->
@@ -64,7 +78,7 @@ class StockInfoAdapter(val onClick: (Stock:MsgArray)->Unit):ListAdapter<MsgArray
 
 
     }
-    private fun handleStockPrice(currentStock:MsgArray):String{
+    private fun handleStockPrice(currentStock: MsgArray):String{
         return if(currentStock.z == "-"){
             currentStock.y
         }else{

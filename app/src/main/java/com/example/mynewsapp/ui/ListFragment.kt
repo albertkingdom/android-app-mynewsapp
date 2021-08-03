@@ -11,7 +11,7 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mynewsapp.MainActivity
-import com.example.mynewsapp.MsgArray
+import com.example.mynewsapp.model.MsgArray
 import com.example.mynewsapp.adapter.StockInfoAdapter
 import com.example.mynewsapp.databinding.FragmentListBinding
 import com.example.mynewsapp.util.Resource
@@ -63,6 +63,21 @@ class ListFragment : Fragment() {
 
         })
 
+        viewModel.allStocksFromdb.observe(viewLifecycleOwner, {
+            //Log.d("list fragment", it.toString())
+            /**
+             * 1. observe the allstocks
+             * 2. map to get List<StockNo>
+             * 3. call getStockPriceInfo() with List<stockNo>
+             */
+            val stockList:List<String> = it.map { stock ->
+                stock.stockNo
+            }.toSet().toList()
+
+
+            viewModel.getStockPriceInfo(stockList)
+        })
+
         binding.floatingBtn.setOnClickListener {
             val dialog = CustomDialogFragment()
 
@@ -76,7 +91,7 @@ class ListFragment : Fragment() {
         binding.paginationProgressBar.visibility = View.VISIBLE
     }
 
-    private val getStockNameToGetRelatedNews:(stockContent:MsgArray)->Unit = { stockContent->
+    private val getStockNameToGetRelatedNews:(stockContent: MsgArray)->Unit = { stockContent->
 
         val stockName = stockContent.n
         viewModel.getRelatedNews(stockName)

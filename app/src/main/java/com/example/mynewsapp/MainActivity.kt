@@ -1,14 +1,13 @@
 package com.example.mynewsapp
 
 import android.os.Bundle
-import android.util.Log
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.mynewsapp.databinding.ActivityMainBinding
+import com.example.mynewsapp.db.StockDatabase
 import com.example.mynewsapp.repository.NewsRepository
 import com.example.mynewsapp.ui.NewsViewModel
 import com.example.mynewsapp.ui.NewsViewModelProviderFactory
@@ -27,7 +26,7 @@ class MainActivity : AppCompatActivity() {
 
         val navView: BottomNavigationView = binding.navView
 
-        val newsRepository = NewsRepository()
+        val newsRepository = NewsRepository((application as MyApplication).database.stockDao())
         val viewModelFactory = NewsViewModelProviderFactory(newsRepository)
         viewModel = ViewModelProvider(this, viewModelFactory)
             .get(NewsViewModel::class.java)

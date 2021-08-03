@@ -1,6 +1,6 @@
 package com.example.mynewsapp.adapter
 
-import Article
+import com.example.mynewsapp.model.Article
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup

@@ -1,3 +1,5 @@
+package com.example.mynewsapp.model
+
 import java.io.Serializable
 
 data class Article(

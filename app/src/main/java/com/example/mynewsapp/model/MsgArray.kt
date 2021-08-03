@@ -1,4 +1,4 @@
-package com.example.mynewsapp
+package com.example.mynewsapp.model
 
 data class MsgArray(
     val a: String,

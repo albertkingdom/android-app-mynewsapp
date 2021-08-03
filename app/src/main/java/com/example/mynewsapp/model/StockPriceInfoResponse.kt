@@ -1,4 +1,4 @@
-package com.example.mynewsapp
+package com.example.mynewsapp.model
 
 data class StockPriceInfoResponse(
     val cachedAlive: Int,
