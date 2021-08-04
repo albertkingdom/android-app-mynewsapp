@@ -1,5 +1,6 @@
 package com.example.mynewsapp.ui
 
+import android.util.Log
 import com.example.mynewsapp.model.NewsResponse
 import androidx.lifecycle.*
 import com.example.mynewsapp.model.StockPriceInfoResponse
@@ -13,9 +14,10 @@ class NewsViewModel(val newsRepository: NewsRepository):ViewModel() {
     var page = 1
     val news:MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
     val stockPriceInfo: MutableLiveData<Resource<StockPriceInfoResponse>> = MutableLiveData()
-    //val stockList = mutableSetOf("2330","0050")
-
+    var viewModelStockNoList = listOf<String>()
     val allStocksFromdb: LiveData<List<Stock>> = newsRepository.allstocks.asLiveData()
+
+
     init {
         getHeadlines()
     }
@@ -31,7 +33,7 @@ class NewsViewModel(val newsRepository: NewsRepository):ViewModel() {
     }
 
     fun getStockPriceInfo(stockList: List<String>){
-
+        //Log.d("model getStockPriceInfo","getStockPriceInfo")
         viewModelScope.launch {
             stockPriceInfo.postValue(Resource.Loading())
 
@@ -83,6 +85,16 @@ class NewsViewModel(val newsRepository: NewsRepository):ViewModel() {
     fun deleteStock(stockNo:String){
         viewModelScope.launch {
             newsRepository.delStock(stockNo)
+        }
+    }
+
+    fun getStockNoListAndToQueryStockPriceInfo(stockList: List<String>){
+        //Log.d("model check!!!","getStockNoListAndToQueryStockPriceInfo")
+        if(stockList.size == viewModelStockNoList.size && stockList.containsAll(viewModelStockNoList)){
+            return
+        }else{
+            viewModelStockNoList = stockList
+            getStockPriceInfo(viewModelStockNoList)
         }
     }
 }

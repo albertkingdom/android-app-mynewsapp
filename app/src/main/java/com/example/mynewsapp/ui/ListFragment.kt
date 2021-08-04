@@ -47,6 +47,8 @@ class ListFragment : Fragment() {
         recyclerView.adapter = stockAdapter
 
         viewModel.stockPriceInfo.observe(viewLifecycleOwner, Observer { response ->
+            //Log.d("list fragment", "observe stockpriceinfo")
+
             when (response) {
                 is Resource.Success -> {
                     hideProgressbar()
@@ -68,7 +70,7 @@ class ListFragment : Fragment() {
         })
 
         viewModel.allStocksFromdb.observe(viewLifecycleOwner, {
-            //Log.d("list fragment", it.toString())
+            //Log.d("list fragment", "observe allstocksfromdb")
             /**
              * 1. observe the allstocks
              * 2. map to get List<StockNo>
@@ -77,9 +79,8 @@ class ListFragment : Fragment() {
             val stockList:List<String> = it.map { stock ->
                 stock.stockNo
             }.toSet().toList()
+            viewModel.getStockNoListAndToQueryStockPriceInfo(stockList)
 
-
-            viewModel.getStockPriceInfo(stockList)
         })
 
         binding.floatingBtn.setOnClickListener {
