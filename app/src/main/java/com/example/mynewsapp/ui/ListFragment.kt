@@ -5,12 +5,10 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import android.widget.Toast.LENGTH_LONG
-import android.widget.Toast.makeText
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import androidx.lifecycle.coroutineScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -21,7 +19,10 @@ import com.example.mynewsapp.db.Stock
 import com.example.mynewsapp.model.MsgArray
 import com.example.mynewsapp.util.Resource
 import com.google.android.material.snackbar.Snackbar
-import java.util.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+
 
 class ListFragment : Fragment() {
     private lateinit var binding: FragmentListBinding
@@ -114,6 +115,16 @@ class ListFragment : Fragment() {
             }
 
         }).attachToRecyclerView(recyclerView)
+
+        binding.swipeRefresh.setOnRefreshListener {
+            //Log.d("list fragment", "pull to refresh")
+            viewModel.getStockPriceInfo()
+            lifecycle.coroutineScope.launch {
+                delay(2000)
+                binding.swipeRefresh.isRefreshing = false
+            }
+        }
+
     }
     private fun hideProgressbar(){
         binding.paginationProgressBar.visibility = View.INVISIBLE

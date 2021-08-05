@@ -44,7 +44,7 @@ class NewsViewModel(val newsRepository: NewsRepository, application: MyApplicati
 
     }
 
-    fun getStockPriceInfo(stockList: List<String>){
+    fun getStockPriceInfo(stockList: List<String> = viewModelStockNoList){
         //Log.d("model getStockPriceInfo","getStockPriceInfo")
         if(isNetworkAvailable()){
             viewModelScope.launch {
@@ -108,7 +108,7 @@ class NewsViewModel(val newsRepository: NewsRepository, application: MyApplicati
         }
     }
 
-    fun getStockNoListAndToQueryStockPriceInfo(stockList: List<String>){
+    fun getStockNoListAndToQueryStockPriceInfo(stockList: List<String> = viewModelStockNoList){
         //Log.d("model check!!!","getStockNoListAndToQueryStockPriceInfo")
         if(stockList.size == viewModelStockNoList.size && stockList.containsAll(viewModelStockNoList)){
             return
@@ -119,7 +119,7 @@ class NewsViewModel(val newsRepository: NewsRepository, application: MyApplicati
     }
 
     fun isNetworkAvailable(): Boolean {
-
+        //Log.d("viewmodel", "isNetworkAvailable")
         val connectivityManager = getApplication<MyApplication>().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             val capabilities = connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
