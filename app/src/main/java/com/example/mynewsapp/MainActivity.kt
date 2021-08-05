@@ -27,7 +27,9 @@ class MainActivity : AppCompatActivity() {
         val navView: BottomNavigationView = binding.navView
 
         val newsRepository = NewsRepository((application as MyApplication).database.stockDao())
-        val viewModelFactory = NewsViewModelProviderFactory(newsRepository)
+        val viewModelFactory = NewsViewModelProviderFactory(newsRepository,
+            application as MyApplication
+        )
         viewModel = ViewModelProvider(this, viewModelFactory)
             .get(NewsViewModel::class.java)
 

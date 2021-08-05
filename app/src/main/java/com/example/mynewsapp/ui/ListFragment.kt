@@ -5,6 +5,9 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import android.widget.Toast.LENGTH_LONG
+import android.widget.Toast.makeText
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -59,8 +62,9 @@ class ListFragment : Fragment() {
                 is Resource.Error -> {
                     response.message?.let { message ->
                         Log.e("stock list fragment", "An error occured: $message")
+                        Snackbar.make(view, "An error occured: $message", Snackbar.LENGTH_LONG).show()
                     }
-                    showProgressbar()
+                    hideProgressbar()
                 }
                 is Resource.Loading -> {
                     showProgressbar()

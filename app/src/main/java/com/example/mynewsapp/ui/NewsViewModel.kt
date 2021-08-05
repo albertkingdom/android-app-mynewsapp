@@ -1,8 +1,14 @@
 package com.example.mynewsapp.ui
 
+import android.app.Application
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.os.Build
 import android.util.Log
 import com.example.mynewsapp.model.NewsResponse
 import androidx.lifecycle.*
+import com.example.mynewsapp.MyApplication
 import com.example.mynewsapp.model.StockPriceInfoResponse
 import com.example.mynewsapp.db.Stock
 import com.example.mynewsapp.repository.NewsRepository
@@ -10,7 +16,9 @@ import com.example.mynewsapp.util.Resource
 import kotlinx.coroutines.launch
 import retrofit2.Response
 
-class NewsViewModel(val newsRepository: NewsRepository):ViewModel() {
+class NewsViewModel(val newsRepository: NewsRepository, application: MyApplication):AndroidViewModel(
+    application
+) {
     var page = 1
     val news:MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
     val stockPriceInfo: MutableLiveData<Resource<StockPriceInfoResponse>> = MutableLiveData()
@@ -24,33 +32,45 @@ class NewsViewModel(val newsRepository: NewsRepository):ViewModel() {
 
 
     fun getHeadlines(){
+       if(isNetworkAvailable()){
+           viewModelScope.launch {
+               news.postValue(Resource.Loading())
+               val response = newsRepository.getHeadlines(country= "tw",category = "business",page = page)
+               news.postValue(handleNewsResponse(response))
+           }
+       }else{
+           news.postValue(Resource.Error("No Internet Connection"))
+       }
 
-        viewModelScope.launch {
-            news.postValue(Resource.Loading())
-            val response = newsRepository.getHeadlines(country= "tw",category = "business",page = page)
-            news.postValue(handleNewsResponse(response))
-        }
     }
 
     fun getStockPriceInfo(stockList: List<String>){
         //Log.d("model getStockPriceInfo","getStockPriceInfo")
-        viewModelScope.launch {
-            stockPriceInfo.postValue(Resource.Loading())
+        if(isNetworkAvailable()){
+            viewModelScope.launch {
+                stockPriceInfo.postValue(Resource.Loading())
 
-            val stockListString:String = stockList.joinToString("|") {
-                "tse_${it}.tw"
+                val stockListString:String = stockList.joinToString("|") {
+                    "tse_${it}.tw"
+                }
+                val response = newsRepository.getStockPriceInfo(stockNo = stockListString)
+                stockPriceInfo.postValue(handleStockPriceInfoResponse(response))
             }
-            val response = newsRepository.getStockPriceInfo(stockNo = stockListString)
-            stockPriceInfo.postValue(handleStockPriceInfoResponse(response))
+        }else{
+            stockPriceInfo.postValue(Resource.Error("No Internet Connection"))
+
         }
     }
 
     fun getRelatedNews(stockName:String){
-
-        viewModelScope.launch {
-            news.postValue(Resource.Loading())
-            val response = newsRepository.searchNews(stockName = stockName,page = page)
-            news.postValue(handleNewsResponse(response))
+        if(isNetworkAvailable()) {
+            viewModelScope.launch {
+                news.postValue(Resource.Loading())
+                val response = newsRepository.searchNews(stockName = stockName, page = page)
+                news.postValue(handleNewsResponse(response))
+            }
+        }else{
+            news.postValue(Resource.Error("No Internet Connection"))
         }
     }
     //get news headlines
@@ -97,10 +117,37 @@ class NewsViewModel(val newsRepository: NewsRepository):ViewModel() {
             getStockPriceInfo(viewModelStockNoList)
         }
     }
+
+    fun isNetworkAvailable(): Boolean {
+
+        val connectivityManager = getApplication<MyApplication>().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val capabilities = connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
+            if (capabilities != null) {
+                when {
+                    capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> {
+                        return true
+                    }
+                    capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> {
+                        return true
+                    }
+                    capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> {
+                        return true
+                    }
+                }
+            }
+        } else {
+            val activeNetworkInfo = connectivityManager.activeNetworkInfo
+            if (activeNetworkInfo != null && activeNetworkInfo.isConnected) {
+                return true
+            }
+        }
+        return false
+    }
 }
 
-class NewsViewModelProviderFactory(val newsRepository: NewsRepository): ViewModelProvider.Factory{
+class NewsViewModelProviderFactory(val newsRepository: NewsRepository, val application: MyApplication): ViewModelProvider.Factory{
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-        return NewsViewModel(newsRepository) as T
+        return NewsViewModel(newsRepository,application) as T
     }
 }
