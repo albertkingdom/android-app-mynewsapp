@@ -1,9 +1,12 @@
 package com.example.mynewsapp.ui
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.coroutineScope
@@ -36,8 +39,13 @@ class NewsFragment : Fragment(R.layout.fragment_news) {
 
         newsAdapter = NewsAdapter()
         newsAdapter.setClickListener{
-            val action = NewsFragmentDirections.actionNewsFragmentToNewsArticleFragment(it)
-            findNavController().navigate(action)
+
+            val webpage: Uri = Uri.parse(it.url)
+            val builder = CustomTabsIntent.Builder()
+            val customTabsIntent = builder.build()
+
+            customTabsIntent.launchUrl(requireContext(), webpage)
+
         }
         recyclerView.adapter = newsAdapter
 

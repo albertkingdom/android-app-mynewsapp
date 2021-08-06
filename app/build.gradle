@@ -72,4 +72,7 @@ dependencies {
 
     // Swipe refresh layout
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
+
+    // custom tab (browser)
+    implementation "androidx.browser:browser:1.3.0"
 }
