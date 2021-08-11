@@ -13,6 +13,9 @@
         <action
             android:id="@+id/action_listFragment_to_newsFragment"
             app:destination="@id/newsFragment" />
+        <action
+            android:id="@+id/action_listFragment_to_candleStickChartFragment"
+            app:destination="@id/candleStickChartFragment" />
     </fragment>
     <fragment
         android:id="@+id/newsFragment"
@@ -30,5 +33,20 @@
         <argument
             android:name="article"
             app:argType="com.example.mynewsapp.model.Article" />
+    </fragment>
+    <fragment
+        android:id="@+id/candleStickChartFragment"
+        android:name="com.example.mynewsapp.ui.CandleStickChartFragment"
+        android:label="fragment_candle_stick_chart"
+        tools:layout="@layout/fragment_candle_stick_chart" >
+        <argument
+            android:name="stockNo"
+            app:argType="string" />
+        <argument
+            android:name="stockName"
+            app:argType="string" />
+        <argument
+            android:name="stockPrice"
+            app:argType="string" />
     </fragment>
 </navigation>

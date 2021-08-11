@@ -13,6 +13,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mynewsapp.MainActivity
+import com.example.mynewsapp.R
 import com.example.mynewsapp.adapter.StockInfoAdapter
 import com.example.mynewsapp.databinding.FragmentListBinding
 import com.example.mynewsapp.db.Stock
@@ -47,7 +48,7 @@ class ListFragment : Fragment() {
         (requireActivity() as AppCompatActivity).supportActionBar?.title = "List"
         viewModel =(activity as MainActivity).viewModel
 
-        stockAdapter = StockInfoAdapter(getStockNameToGetRelatedNews)
+        stockAdapter = StockInfoAdapter(getStockNameToGetRelatedNews, toCandelStickChartFragment)
         recyclerView.adapter = stockAdapter
 
         viewModel.stockPriceInfo.observe(viewLifecycleOwner, Observer { response ->
@@ -138,5 +139,14 @@ class ListFragment : Fragment() {
         val stockName = stockContent.n
         viewModel.getRelatedNews(stockName)
         findNavController().navigate(ListFragmentDirections.actionListFragmentToNewsFragment())
+    }
+
+    private val toCandelStickChartFragment:(stockContent: MsgArray) -> Unit = {
+
+        val stockNo = it.c
+        val stockPrice:String = if(it.z != "-") it.z else it.y
+        val stockName = it.n
+        viewModel.getCandleStickData("", stockNo)
+        findNavController().navigate(ListFragmentDirections.actionListFragmentToCandleStickChartFragment(stockNo,stockName,stockPrice))
     }
 }

@@ -4,7 +4,12 @@ import android.os.Bundle
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.findNavController
+
 import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.navigateUp
+import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.mynewsapp.databinding.ActivityMainBinding
 import com.example.mynewsapp.db.StockDatabase
@@ -17,13 +22,13 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     lateinit var viewModel: NewsViewModel
+    private lateinit var appBarConfiguration: AppBarConfiguration
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
         val navView: BottomNavigationView = binding.navView
 
         val newsRepository = NewsRepository((application as MyApplication).database.stockDao())
@@ -38,6 +43,15 @@ class MainActivity : AppCompatActivity() {
         val navController = navHostFragment.navController
         navView.setupWithNavController(navController)
 
-//        setSupportActionBar(findViewById(R.id.my_toolbar))
+        appBarConfiguration = AppBarConfiguration(setOf(R.id.listFragment, R.id.newsFragment))
+
+        setupActionBarWithNavController(navController, appBarConfiguration)
+
+
+    }
+    override fun onSupportNavigateUp(): Boolean {
+        val navController = findNavController(R.id.StockNavHostFragment)
+        return navController.navigateUp(appBarConfiguration)
+                || super.onSupportNavigateUp()
     }
 }

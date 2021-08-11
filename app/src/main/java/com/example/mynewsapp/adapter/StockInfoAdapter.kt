@@ -7,6 +7,8 @@ import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.navigation.fragment.NavHostFragment.findNavController
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -15,7 +17,7 @@ import com.example.mynewsapp.R
 import com.example.mynewsapp.databinding.ItemStockinfoBinding
 
 
-class StockInfoAdapter(val onClick: (Stock: MsgArray)->Unit):ListAdapter<MsgArray, StockInfoAdapter.StockViewHolder>(DiffCallback) {
+class StockInfoAdapter(val onClick: (Stock: MsgArray)->Unit, val toCandleStickChart: (Stock: MsgArray)->Unit):ListAdapter<MsgArray, StockInfoAdapter.StockViewHolder>(DiffCallback) {
     companion object {
         private val DiffCallback = object : DiffUtil.ItemCallback<MsgArray>(){
             override fun areItemsTheSame(oldItem: MsgArray, newItem: MsgArray): Boolean {
@@ -73,6 +75,10 @@ class StockInfoAdapter(val onClick: (Stock: MsgArray)->Unit):ListAdapter<MsgArra
 
             root.setOnClickListener { it ->
                 onClick(currentStock)
+            }
+
+            showCandleStickChart.setOnClickListener {
+                toCandleStickChart(currentStock)
             }
         }
 

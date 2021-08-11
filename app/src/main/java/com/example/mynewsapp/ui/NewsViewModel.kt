@@ -11,6 +11,7 @@ import androidx.lifecycle.*
 import com.example.mynewsapp.MyApplication
 import com.example.mynewsapp.model.StockPriceInfoResponse
 import com.example.mynewsapp.db.Stock
+import com.example.mynewsapp.model.CandleStickData
 import com.example.mynewsapp.repository.NewsRepository
 import com.example.mynewsapp.util.Resource
 import kotlinx.coroutines.launch
@@ -24,7 +25,7 @@ class NewsViewModel(val newsRepository: NewsRepository, application: MyApplicati
     val stockPriceInfo: MutableLiveData<Resource<StockPriceInfoResponse>> = MutableLiveData()
     var viewModelStockNoList = listOf<String>()
     val allStocksFromdb: LiveData<List<Stock>> = newsRepository.allstocks.asLiveData()
-
+    val candleStickData: MutableLiveData<Resource<CandleStickData>> = MutableLiveData()
 
     init {
         getHeadlines()
@@ -73,6 +74,17 @@ class NewsViewModel(val newsRepository: NewsRepository, application: MyApplicati
             news.postValue(Resource.Error("No Internet Connection"))
         }
     }
+
+    fun getCandleStickData(currentDate:String, stockNo: String){
+        if (isNetworkAvailable()){
+            viewModelScope.launch {
+                candleStickData.postValue(Resource.Loading())
+
+                val response = newsRepository.getCandleStickData(currentDate, stockNo)
+                candleStickData.postValue(handleCandleStickDataResponse(response))
+            }
+        }
+    }
     //get news headlines
     private fun handleNewsResponse(response: Response<NewsResponse>): Resource<NewsResponse>{
         if (response.isSuccessful){
@@ -85,6 +97,16 @@ class NewsViewModel(val newsRepository: NewsRepository, application: MyApplicati
     }
     //get stockprice
     private fun handleStockPriceInfoResponse(response: Response<StockPriceInfoResponse>): Resource<StockPriceInfoResponse>{
+        if (response.isSuccessful){
+            response.body()?.let {
+                    resultResponse->
+                return Resource.Success(resultResponse)
+            }
+        }
+        return Resource.Error(response.message())
+    }
+
+    private fun handleCandleStickDataResponse(response: Response<CandleStickData>): Resource<CandleStickData>{
         if (response.isSuccessful){
             response.body()?.let {
                     resultResponse->
