@@ -57,17 +57,16 @@ class NewsFragment : Fragment(R.layout.fragment_news) {
                     response.data?.let { newsResponse ->
                         newsAdapter.submitList(newsResponse.articles)
                     }
-                    hideProgressbar()
+                    binding.swipeRefresh.isRefreshing = false
                 }
                 is Resource.Error -> {
                     response.message?.let { message ->
                         //Log.e("newsfragment", "An error occured: $message")
                         Snackbar.make(view, "An error occured: $message", Snackbar.LENGTH_LONG).show()
                     }
-                    hideProgressbar()
                 }
                 is Resource.Loading -> {
-                    showProgressbar()
+                    binding.swipeRefresh.isRefreshing = true
                 }
             }
         })
@@ -75,20 +74,8 @@ class NewsFragment : Fragment(R.layout.fragment_news) {
         binding.swipeRefresh.setOnRefreshListener {
             //Log.d("list fragment", "pull to refresh")
             viewModel.getHeadlines()
-            lifecycle.coroutineScope.launch {
-                delay(2000)
-                binding.swipeRefresh.isRefreshing = false
-            }
+
         }
     }
 
-
-
-    private fun hideProgressbar() {
-        binding.paginationProgressBar.visibility = View.INVISIBLE
-    }
-
-    private fun showProgressbar() {
-        binding.paginationProgressBar.visibility = View.VISIBLE
-    }
 }
