@@ -5,18 +5,21 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getColor
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.mynewsapp.MainActivity
 import com.example.mynewsapp.R
+import com.example.mynewsapp.adapter.StockHistoryAdapter
 import com.example.mynewsapp.databinding.FragmentCandleStickChartBinding
+import com.example.mynewsapp.db.InvestHistory
+//import com.example.mynewsapp.db.InvestHistory
 import com.example.mynewsapp.model.CandleStickData
+import com.example.mynewsapp.model.StockHistory
 import com.example.mynewsapp.util.Resource
 import com.github.mikephil.charting.charts.CandleStickChart
 import com.github.mikephil.charting.components.XAxis
@@ -27,19 +30,28 @@ import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener
+import com.github.mikephil.charting.utils.EntryXComparator
 import com.google.android.material.snackbar.Snackbar
+import java.util.*
+import kotlin.collections.ArrayList
 
 class CandleStickChartFragment: Fragment() {
 
     lateinit var binding: FragmentCandleStickChartBinding
     lateinit var viewModel: NewsViewModel
-    val args: CandleStickChartFragmentArgs by navArgs()
+    private val args: CandleStickChartFragmentArgs by navArgs()
 
     lateinit var chart:CandleStickChart
     val xLabels = ArrayList<String>() //x axis label list
     val candelStickEntry = ArrayList<CandleEntry>() //y values
     lateinit var candleDataSet:CandleDataSet //y values group: values + label
+    private lateinit var historyAdapter: StockHistoryAdapter
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        //Log.d("candle fragment","onCreate")
+        setHasOptionsMenu(true)
+    }
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -49,17 +61,28 @@ class CandleStickChartFragment: Fragment() {
         chart = binding.candleStickChart
         //change toolbar title
         (requireActivity() as AppCompatActivity).supportActionBar?.title = "${args.stockNo} k線圖"
+
+        viewModel =(activity as MainActivity).viewModel
+        viewModel.getCandleStickData("", args.stockNo)
+        viewModel.queryHistoryByStockNo(args.stockNo)
+        Log.d("candle fragment","on create view ${args.stockNo}")
+
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel =(activity as MainActivity).viewModel
+        Log.d("candle fragment","onViewCreated")
 
         binding.stockNo.text = args.stockNo
         binding.stockName.text = args.stockName
         binding.stockPrice.text = String.format("%.2f",args.stockPrice.toFloat())
 
+        val recyclerView = binding.investHistory
+
+        historyAdapter = StockHistoryAdapter()
+        historyAdapter.setStockPrice(args.stockPrice)
+        recyclerView.adapter = historyAdapter
 
         viewModel.candleStickData.observe(viewLifecycleOwner, { response ->
             when (response) {
@@ -80,7 +103,7 @@ class CandleStickChartFragment: Fragment() {
                             )
                             initOpenCloseHighLowValue(stockInfoResponse.data.last()[7])
                         }
-
+                        Collections.sort(candelStickEntry, EntryXComparator())
                         candleDataSet = CandleDataSet(candelStickEntry, args.stockNo)
 
                         initCandleDataFormat()
@@ -105,6 +128,12 @@ class CandleStickChartFragment: Fragment() {
                 }
             }
         })
+
+        viewModel.investHistoryList.observe(viewLifecycleOwner, {
+
+            historyAdapter.submitList(it)
+        })
+
     }
 
     /**
@@ -115,7 +144,12 @@ class CandleStickChartFragment: Fragment() {
             valueFormatter = IndexAxisValueFormatter(xLabels)
             position = XAxis.XAxisPosition.BOTTOM
             labelRotationAngle= -25f
+            setDrawGridLines(false)
         }
+        chart.setDrawBorders(true)
+        chart.axisRight.isEnabled = false
+
+
     }
 
     /**
@@ -128,7 +162,7 @@ class CandleStickChartFragment: Fragment() {
             increasingColor = getColor(requireContext(),R.color.red)
             decreasingPaintStyle = Paint.Style.FILL
             increasingPaintStyle = Paint.Style.FILL
-
+            setDrawValues(false)
         }
 
     }
@@ -183,6 +217,28 @@ class CandleStickChartFragment: Fragment() {
 
         }
     }
+    private fun navigateToAddHistoryFragment() {
+        val stockNo = args.stockNo
+        findNavController().navigate(CandleStickChartFragmentDirections.actionCandleStickChartFragmentToAddHistoryFragment(stockNo))
+    }
 
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.candle_stick_chart_fragment_option_menu, menu)
+    }
 
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+
+        return when (item.itemId) {
+            R.id.addButton -> {
+                navigateToAddHistoryFragment()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        //Log.d("candle fragment","on destroy view")
+    }
 }

@@ -7,6 +7,8 @@ import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Filter
+import android.widget.Filterable
 import androidx.navigation.fragment.NavHostFragment.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
@@ -17,7 +19,9 @@ import com.example.mynewsapp.R
 import com.example.mynewsapp.databinding.ItemStockinfoBinding
 
 
-class StockInfoAdapter(val onClick: (Stock: MsgArray)->Unit, val toCandleStickChart: (Stock: MsgArray)->Unit):ListAdapter<MsgArray, StockInfoAdapter.StockViewHolder>(DiffCallback) {
+class StockInfoAdapter(val onClick: (Stock: MsgArray)->Unit, val toCandleStickChart: (Stock: MsgArray)->Unit):ListAdapter<MsgArray, StockInfoAdapter.StockViewHolder>(DiffCallback), Filterable {
+    private var list = mutableListOf<MsgArray>()
+
     companion object {
         private val DiffCallback = object : DiffUtil.ItemCallback<MsgArray>(){
             override fun areItemsTheSame(oldItem: MsgArray, newItem: MsgArray): Boolean {
@@ -31,6 +35,10 @@ class StockInfoAdapter(val onClick: (Stock: MsgArray)->Unit, val toCandleStickCh
         }
     }
 
+    fun setData(list: MutableList<MsgArray>?){
+        this.list = list!!
+        submitList(list)
+    }
     class StockViewHolder(view: View):RecyclerView.ViewHolder(view){
 
     }
@@ -91,5 +99,34 @@ class StockInfoAdapter(val onClick: (Stock: MsgArray)->Unit, val toCandleStickCh
             currentStock.z
         }
     }
+// to filter with searchview in list fragment
+    override fun getFilter(): Filter {
+       return customFilter
+    }
 
+    private val customFilter = object : Filter() {
+        override fun performFiltering(constraint: CharSequence?): FilterResults {
+            val filteredList = ArrayList<MsgArray>()
+            if (constraint == null || constraint.isEmpty()) {
+                filteredList.addAll(list)
+
+            } else {
+                for (item in list) {
+                    if (item.c.contains(constraint)) {
+                        filteredList.add(item)
+                    }
+                }
+            }
+            val results = FilterResults()
+            results.values = filteredList
+            return results
+
+        }
+
+        override fun publishResults(p0: CharSequence?, filterResults: FilterResults?) {
+
+            submitList(filterResults?.values as MutableList<MsgArray>)
+        }
+
+    }
 }

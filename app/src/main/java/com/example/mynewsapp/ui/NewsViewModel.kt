@@ -9,13 +9,18 @@ import android.util.Log
 import com.example.mynewsapp.model.NewsResponse
 import androidx.lifecycle.*
 import com.example.mynewsapp.MyApplication
+import com.example.mynewsapp.db.InvestHistory
+
 import com.example.mynewsapp.model.StockPriceInfoResponse
 import com.example.mynewsapp.db.Stock
 import com.example.mynewsapp.model.CandleStickData
+import com.example.mynewsapp.model.StockHistory
 import com.example.mynewsapp.repository.NewsRepository
 import com.example.mynewsapp.util.Resource
 import kotlinx.coroutines.launch
 import retrofit2.Response
+import java.util.*
+import java.util.concurrent.Flow
 
 class NewsViewModel(val newsRepository: NewsRepository, application: MyApplication):AndroidViewModel(
     application
@@ -26,6 +31,14 @@ class NewsViewModel(val newsRepository: NewsRepository, application: MyApplicati
     var viewModelStockNoList = listOf<String>()
     val allStocksFromdb: LiveData<List<Stock>> = newsRepository.allstocks.asLiveData()
     val candleStickData: MutableLiveData<Resource<CandleStickData>> = MutableLiveData()
+//    val investHistoryList: List<StockHistory> = listOf(
+//        StockHistory(id= 1, stockNo = "0050", date = Date(), price = 135.0, amount = 999, status = 1),
+//        StockHistory(id= 2, stockNo = "0050", date = Date(), price = 135.0, amount = 999, status = 0),
+//        StockHistory(id= 3, stockNo = "0050", date = Date(), price = 135.0, amount = 999, status = 1),
+//        StockHistory(id= 4, stockNo = "0050", date = Date(), price = 135.0, amount = 999, status = 1),
+//        StockHistory(id= 4, stockNo = "2603", date = Date(), price = 80.0, amount = 999, status = 1),
+//    )
+    var investHistoryList: LiveData<List<InvestHistory>> = MutableLiveData<List<InvestHistory>>()
 
     init {
         getHeadlines()
@@ -165,6 +178,25 @@ class NewsViewModel(val newsRepository: NewsRepository, application: MyApplicati
             }
         }
         return false
+    }
+
+    fun queryHistoryByStockNo(stockNo: String) {
+
+           investHistoryList = newsRepository.queryHistoryByStockNo(stockNo).asLiveData()
+
+//        return investHistoryList
+    }
+
+    fun insertHistory(investHistory: InvestHistory) {
+        viewModelScope.launch {
+            newsRepository.insertHistory(investHistory)
+        }
+    }
+
+    fun deleteAllHistory(stockNo: String){
+        viewModelScope.launch {
+            newsRepository.deleteAllHistory(stockNo)
+        }
     }
 }
 

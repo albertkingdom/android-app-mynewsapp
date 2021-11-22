@@ -5,9 +5,13 @@ import com.example.mynewsapp.model.StockPriceInfoResponse
 import com.example.mynewsapp.api.RetrofitInstance
 import com.example.mynewsapp.api.RetrofitInstanceForCandleStickData
 import com.example.mynewsapp.api.RetrofitInstanceForStockPrice
+import com.example.mynewsapp.db.InvestHistory
+
+
 import com.example.mynewsapp.db.Stock
 import com.example.mynewsapp.db.StockDao
 import com.example.mynewsapp.model.CandleStickData
+import com.example.mynewsapp.model.StockHistory
 import kotlinx.coroutines.flow.Flow
 import retrofit2.Response
 
@@ -36,5 +40,17 @@ class NewsRepository(val stockDao: StockDao) {
 
     suspend fun getCandleStickData(currentDate:String, stockNo: String):Response<CandleStickData>{
         return  RetrofitInstanceForCandleStickData.retrofitService.getCandleStickData(currentDate, stockNo)
+    }
+
+    fun queryHistoryByStockNo(stockNo: String): Flow<List<InvestHistory>> {
+        return stockDao.getHistoryByStockNo(stockNo)
+    }
+
+    suspend fun insertHistory(investHistory: InvestHistory){
+        stockDao.insertHistory(investHistory)
+    }
+
+    suspend fun deleteAllHistory(stockNo: String){
+        stockDao.deleteAllHistory(stockNo)
     }
 }

@@ -48,5 +48,16 @@
         <argument
             android:name="stockPrice"
             app:argType="string" />
+        <action
+            android:id="@+id/action_candleStickChartFragment_to_addHistoryFragment"
+            app:destination="@id/addHistoryFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/addHistoryFragment"
+        android:name="com.example.mynewsapp.ui.AddHistoryFragment"
+        android:label="fragment_add_history"
+        tools:layout="@layout/fragment_add_history" >
+        <argument android:name="stockNo"
+            app:argType="string" />
     </fragment>
 </navigation>

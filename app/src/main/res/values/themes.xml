@@ -12,5 +12,16 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
+        <item name="android:textColorPrimary">@color/black</item>
+    </style>
+    <style name="Theme.MyNewsApp.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+    <style name="Theme.MyNewsApp.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="Theme.MyNewsApp.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+    <style name="SearchViewStyle" parent="Widget.AppCompat.SearchView">
+
+        <item name="android:tint">@color/white</item>
     </style>
 </resources>

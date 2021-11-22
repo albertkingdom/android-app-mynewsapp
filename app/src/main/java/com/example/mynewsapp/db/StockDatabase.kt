@@ -1,11 +1,12 @@
 package com.example.mynewsapp.db
 
 import android.content.Context
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [Stock::class], version = 1, exportSchema = false)
+@Database(entities = [Stock::class, InvestHistory::class], version = 2, autoMigrations = [AutoMigration (from = 1, to = 2)], exportSchema = true)
 abstract class StockDatabase:RoomDatabase() {
 
     abstract fun stockDao(): StockDao

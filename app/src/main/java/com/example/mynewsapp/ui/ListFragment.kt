@@ -2,10 +2,10 @@ package com.example.mynewsapp.ui
 
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.coroutineScope
@@ -20,9 +20,7 @@ import com.example.mynewsapp.db.Stock
 import com.example.mynewsapp.model.MsgArray
 import com.example.mynewsapp.util.Resource
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+
 
 
 class ListFragment : Fragment() {
@@ -37,6 +35,7 @@ class ListFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         binding = FragmentListBinding.inflate(inflater, container, false)
+        setHasOptionsMenu(true)
         return binding.root
     }
 
@@ -57,7 +56,8 @@ class ListFragment : Fragment() {
             when (response) {
                 is Resource.Success -> {
                     response.data?.let { stockInfoResponse ->
-                        stockAdapter.submitList(stockInfoResponse.msgArray)
+                        //stockAdapter.submitList(stockInfoResponse.msgArray)
+                        stockAdapter.setData(stockInfoResponse.msgArray.toMutableList())
                     }
                     binding.swipeRefresh.isRefreshing = false
                 }
@@ -111,6 +111,7 @@ class ListFragment : Fragment() {
                 val currentStockItem = stockAdapter.currentList[viewHolder.adapterPosition]
 
                 viewModel.deleteStock(currentStockItem.c)
+                viewModel.deleteAllHistory(currentStockItem.c)
                 Snackbar.make(view, "追蹤股票代號已刪除",Snackbar.LENGTH_LONG).show()
             }
 
@@ -136,7 +137,30 @@ class ListFragment : Fragment() {
         val stockNo = it.c
         val stockPrice:String = if(it.z != "-") it.z else it.y
         val stockName = it.n
-        viewModel.getCandleStickData("", stockNo)
+//        viewModel.getCandleStickData("", stockNo)
         findNavController().navigate(ListFragmentDirections.actionListFragmentToCandleStickChartFragment(stockNo,stockName,stockPrice))
+    }
+
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.options_menu, menu)
+        val searchView = menu.findItem(R.id.app_bar_search).actionView as SearchView
+        searchView.apply {
+            queryHint = "請輸入代號"
+            setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(p0: String?): Boolean {
+                    return false
+                }
+
+                override fun onQueryTextChange(text: String?): Boolean {
+                    Log.d("query text", text.toString())
+                    stockAdapter.filter.filter(text)
+                    return true
+                }
+
+            })
+        }
+
     }
 }
