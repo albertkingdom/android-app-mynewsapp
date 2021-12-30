@@ -1,11 +1,18 @@
 package com.example.mynewsapp.ui
 
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.Drawable
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import androidx.annotation.RequiresApi
 
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.coroutineScope
@@ -28,7 +35,8 @@ class ListFragment : Fragment() {
     private lateinit var viewModel: NewsViewModel
 
     private lateinit var stockAdapter: StockInfoAdapter
-
+    private lateinit var swipeBackground: ColorDrawable
+    private lateinit var deleteIcon: Drawable
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -94,6 +102,7 @@ class ListFragment : Fragment() {
             dialog.show(parentFragmentManager,"stock")
         }
 
+
         /**
          * swipe to delete a stockNo from db
          */
@@ -113,6 +122,56 @@ class ListFragment : Fragment() {
                 viewModel.deleteStock(currentStockItem.c)
                 viewModel.deleteAllHistory(currentStockItem.c)
                 Snackbar.make(view, "追蹤股票代號已刪除",Snackbar.LENGTH_LONG).show()
+            }
+
+
+            override fun onChildDraw(
+                c: Canvas,
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                dX: Float,
+                dY: Float,
+                actionState: Int,
+                isCurrentlyActive: Boolean
+            ) {
+                // draw background and icon when swipe
+                swipeBackground = ColorDrawable(resources.getColor(R.color.red, null))
+                deleteIcon = ContextCompat.getDrawable(requireContext(), R.drawable.delete_icon)!!
+
+                val itemView = viewHolder.itemView
+                val iconMargin = (itemView.height - deleteIcon.intrinsicHeight) / 2
+
+
+                if (dX > 0) {
+                    // swipe right
+                    swipeBackground.setBounds(itemView.left, itemView.top, dX.toInt(), itemView.bottom)
+                    deleteIcon.setBounds(itemView.left + iconMargin, itemView.top + iconMargin, itemView.left + iconMargin + deleteIcon.intrinsicWidth, itemView.bottom - iconMargin)
+
+                } else {
+                    swipeBackground.setBounds(itemView.right + dX.toInt(), itemView.top, itemView.right, itemView.bottom)
+                    deleteIcon.setBounds(itemView.right - iconMargin - deleteIcon.intrinsicWidth, itemView.top + iconMargin, itemView.right - iconMargin, itemView.bottom - iconMargin)
+
+                }
+                swipeBackground.draw(c)
+
+                c.save()
+                if (dX > 0 ) {
+                    c.clipRect(itemView.left, itemView.top, dX.toInt(), itemView.bottom)
+                } else {
+                    c.clipRect(itemView.right + dX.toInt(), itemView.top, itemView.right, itemView.bottom)
+
+                }
+                deleteIcon.draw(c)
+                c.restore()
+                super.onChildDraw(
+                    c,
+                    recyclerView,
+                    viewHolder,
+                    dX,
+                    dY,
+                    actionState,
+                    isCurrentlyActive
+                )
             }
 
         }).attachToRecyclerView(recyclerView)
