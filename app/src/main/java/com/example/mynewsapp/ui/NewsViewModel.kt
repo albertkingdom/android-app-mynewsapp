@@ -68,7 +68,7 @@ class NewsViewModel(val newsRepository: NewsRepository, application: MyApplicati
                     "tse_${it}.tw"
                 }
                 val response = newsRepository.getStockPriceInfo(stockNo = stockListString)
-                stockPriceInfo.postValue(handleStockPriceInfoResponse(response))
+                stockPriceInfo.value = handleStockPriceInfoResponse(response)
             }
         }else{
             stockPriceInfo.postValue(Resource.Error("No Internet Connection"))
@@ -94,7 +94,8 @@ class NewsViewModel(val newsRepository: NewsRepository, application: MyApplicati
                 candleStickData.postValue(Resource.Loading())
 
                 val response = newsRepository.getCandleStickData(currentDate, stockNo)
-                candleStickData.postValue(handleCandleStickDataResponse(response))
+                candleStickData.value = handleCandleStickDataResponse(response)
+
             }
         }
     }
@@ -197,6 +198,10 @@ class NewsViewModel(val newsRepository: NewsRepository, application: MyApplicati
         viewModelScope.launch {
             newsRepository.deleteAllHistory(stockNo)
         }
+    }
+
+    fun clearCandleStickData() {
+        candleStickData.value = null
     }
 }
 

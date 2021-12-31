@@ -82,12 +82,14 @@ class StockInfoAdapter(val onClick: (Stock: MsgArray)->Unit, val toCandleStickCh
             }
 
             root.setOnClickListener { it ->
-                onClick(currentStock)
+//                onClick(currentStock)
+                toCandleStickChart(currentStock)
+
             }
 
-            showCandleStickChart.setOnClickListener {
-                toCandleStickChart(currentStock)
-            }
+//            showCandleStickChart.setOnClickListener {
+//                toCandleStickChart(currentStock)
+//            }
         }
 
 

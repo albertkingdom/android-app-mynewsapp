@@ -60,7 +60,7 @@ class CandleStickChartFragment: Fragment() {
         binding = FragmentCandleStickChartBinding.inflate(inflater)
         chart = binding.candleStickChart
         //change toolbar title
-        (requireActivity() as AppCompatActivity).supportActionBar?.title = "${args.stockNo} k線圖"
+        (requireActivity() as AppCompatActivity).supportActionBar?.title = "${args.stockNo}"
 
         viewModel =(activity as MainActivity).viewModel
         viewModel.getCandleStickData("", args.stockNo)
@@ -87,7 +87,6 @@ class CandleStickChartFragment: Fragment() {
         viewModel.candleStickData.observe(viewLifecycleOwner, { response ->
             when (response) {
                 is Resource.Success -> {
-
                     response.data?.let { stockInfoResponse ->
                         for ((index,day) in stockInfoResponse.data.withIndex()){
 
@@ -157,12 +156,13 @@ class CandleStickChartFragment: Fragment() {
      */
     private fun initCandleDataFormat(){
         candleDataSet.apply {
-            shadowColor = getColor(requireContext(),R.color.black)
+            //shadowColor = getColor(requireContext(),R.color.black)
             decreasingColor = getColor(requireContext(),R.color.green)
             increasingColor = getColor(requireContext(),R.color.red)
             decreasingPaintStyle = Paint.Style.FILL
             increasingPaintStyle = Paint.Style.FILL
             setDrawValues(false)
+            shadowColorSameAsCandle = true
         }
 
     }
@@ -238,6 +238,7 @@ class CandleStickChartFragment: Fragment() {
     }
 
     override fun onDestroyView() {
+        viewModel.clearCandleStickData()
         super.onDestroyView()
         //Log.d("candle fragment","on destroy view")
     }

@@ -26,7 +26,7 @@
         android:layout_margin="20sp"
         android:id="@+id/floatingBtn"
         android:src="@drawable/ic_add"
-        app:tint="@android:color/white"
-        app:backgroundTint="@color/purple_500"
+        app:tint="?attr/colorPrimary"
+        app:backgroundTint="?attr/colorOnPrimary"
         android:contentDescription="ADD" />
 </androidx.constraintlayout.widget.ConstraintLayout>
