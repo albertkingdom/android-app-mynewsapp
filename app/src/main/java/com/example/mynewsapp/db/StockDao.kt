@@ -15,6 +15,9 @@ interface StockDao {
     @Query("DELETE FROM stockList WHERE stockNo = :stockNumberToDel")
     suspend fun delete(stockNumberToDel:String)
 
+    @Query("SELECT * FROM investHistory")
+    fun getAllHistory(): Flow<List<InvestHistory>>
+
     @Query("SELECT * FROM investHistory WHERE stockNo = :stockNo")
     fun getHistoryByStockNo(stockNo: String): Flow<List<InvestHistory>>
 

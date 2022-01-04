@@ -2,6 +2,7 @@ package com.example.mynewsapp.ui
 
 import android.app.Dialog
 import android.content.DialogInterface
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -39,6 +40,15 @@ class CustomDialogFragment : DialogFragment() {
                 })
             // Create the AlertDialog object and return it
             .create()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        val positiveButton = (dialog as AlertDialog).getButton(AlertDialog.BUTTON_POSITIVE)
+        val negativeButton = (dialog as AlertDialog).getButton(AlertDialog.BUTTON_NEGATIVE)
+        positiveButton.setTextColor(Color.LTGRAY)
+        negativeButton.setTextColor(Color.LTGRAY)
+
     }
 
 

@@ -1,6 +1,5 @@
 package com.example.mynewsapp.ui
 
-import android.app.Application
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
@@ -14,13 +13,11 @@ import com.example.mynewsapp.db.InvestHistory
 import com.example.mynewsapp.model.StockPriceInfoResponse
 import com.example.mynewsapp.db.Stock
 import com.example.mynewsapp.model.CandleStickData
-import com.example.mynewsapp.model.StockHistory
+import com.example.mynewsapp.model.StockStatistic
 import com.example.mynewsapp.repository.NewsRepository
 import com.example.mynewsapp.util.Resource
 import kotlinx.coroutines.launch
 import retrofit2.Response
-import java.util.*
-import java.util.concurrent.Flow
 
 class NewsViewModel(val newsRepository: NewsRepository, application: MyApplication):AndroidViewModel(
     application
@@ -39,9 +36,12 @@ class NewsViewModel(val newsRepository: NewsRepository, application: MyApplicati
 //        StockHistory(id= 4, stockNo = "2603", date = Date(), price = 80.0, amount = 999, status = 1),
 //    )
     var investHistoryList: LiveData<List<InvestHistory>> = MutableLiveData<List<InvestHistory>>()
-
+    val allInvestHistoryList: LiveData<List<InvestHistory>> = newsRepository.allHistory.asLiveData()
+//    var investStatistics: MutableLiveData<Map<String, Float>> = MutableLiveData()
+    var investStatisticsList: MutableLiveData<List<StockStatistic>> = MutableLiveData()
     init {
         getHeadlines()
+
     }
 
 
@@ -202,6 +202,42 @@ class NewsViewModel(val newsRepository: NewsRepository, application: MyApplicati
 
     fun clearCandleStickData() {
         candleStickData.value = null
+    }
+
+    fun calculateForPieChart() {
+
+        val mapOfStockNoToAmount = mutableMapOf<String, Int>() // {0056 to 200}
+        val mapOfStockNoToCurrentPrice = mutableMapOf<String, Float>() //{0056 to 32}
+        val mapOfStockNoToTotalMoney = mutableMapOf<String, Float>() // {0056 to 200*32}
+        allInvestHistoryList.value?.map { history ->
+            if (mapOfStockNoToAmount[history.stockNo] == null) {
+
+                mapOfStockNoToAmount[history.stockNo] = history.amount * (if (history.status == 0) 1 else -1)
+            } else {
+                mapOfStockNoToAmount[history.stockNo] = mapOfStockNoToAmount[history.stockNo]!! + history.amount * (if (history.status == 0) 1 else -1)
+            }
+        }
+        //Log.d("viewmodel", mapOfStockNoToAmount.toString())
+
+        stockPriceInfo.value?.data?.msgArray?.map {
+
+            mapOfStockNoToCurrentPrice[it.c] = (if (it.z != "-") it.z else it.y).toFloat()
+        }
+        //Log.d("viewmodel mapOfCurrentPrice", mapOfCurrentPrice.toString())
+
+        mapOfStockNoToAmount.map { entry ->
+            mapOfStockNoToTotalMoney[entry.key] = entry.value * mapOfStockNoToCurrentPrice[entry.key]!!
+
+        }
+        investStatisticsList.value = mapOfStockNoToAmount.map { entry ->
+
+            StockStatistic(entry.key, entry.value * mapOfStockNoToCurrentPrice[entry.key]!!)
+        }
+        //Log.d("viewmodel mapOfTotalMoney", mapOfStockNoToTotalMoney.toString())
+
+        //investStatistics.postValue(mapOfStockNoToTotalMoney)
+
+        //Log.d("viewmodel investStatistics", investStatistics.value.toString())
     }
 }
 

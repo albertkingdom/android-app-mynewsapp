@@ -45,6 +45,15 @@ class AddHistoryFragment: Fragment() {
 
         }
 
+        binding.switchBuyOrSell.setOnCheckedChangeListener { buttonView, isChecked ->
+            if (isChecked) {
+                binding.switchBuyOrSell.text = "buy"
+            } else {
+                binding.switchBuyOrSell.text = "sell"
+
+            }
+        }
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -67,7 +76,7 @@ class AddHistoryFragment: Fragment() {
         val amount = binding.amount.editText?.text.toString().toIntOrNull()
         val price = binding.price.editText?.text.toString().toDoubleOrNull()
         val date = if (dateSelected != null) dateSelected else binding.calendar.date
-
+        val isBuy = if (binding.switchBuyOrSell.isChecked) 0 else 1
         if (stockNo.isEmpty()) {
             binding.stockNo.error = "不可為空白"
             return
@@ -78,7 +87,7 @@ class AddHistoryFragment: Fragment() {
             binding.price.error = "必須大於0"
             return
         }
-        val newHistory = InvestHistory(0, stockNo = stockNo, amount = amount, price = price, status = 0, date = date!!)
+        val newHistory = InvestHistory(0, stockNo = stockNo, amount = amount, price = price, status = isBuy, date = date!!)
 
         viewModel.insertHistory(newHistory)
 

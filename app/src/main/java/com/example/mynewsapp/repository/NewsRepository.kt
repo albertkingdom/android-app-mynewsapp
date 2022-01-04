@@ -6,6 +6,7 @@ import com.example.mynewsapp.api.RetrofitInstance
 import com.example.mynewsapp.api.RetrofitInstanceForCandleStickData
 import com.example.mynewsapp.api.RetrofitInstanceForStockPrice
 import com.example.mynewsapp.db.InvestHistory
+import com.example.mynewsapp.db.InvestHistoryDao
 
 
 import com.example.mynewsapp.db.Stock
@@ -42,6 +43,8 @@ class NewsRepository(val stockDao: StockDao) {
         return  RetrofitInstanceForCandleStickData.retrofitService.getCandleStickData(currentDate, stockNo)
     }
 
+    val allHistory: Flow<List<InvestHistory>> = stockDao.getAllHistory()
+    
     fun queryHistoryByStockNo(stockNo: String): Flow<List<InvestHistory>> {
         return stockDao.getHistoryByStockNo(stockNo)
     }

@@ -11,6 +11,9 @@
         android:icon="@drawable/ic_dashboard_black_24dp"
         android:title="@string/title_businessNewsList" />
 
-
+    <item
+        android:id="@+id/statisticFragment"
+        android:icon="@drawable/pie_chart_icon"
+        android:title="Statistic" />
 
 </menu>

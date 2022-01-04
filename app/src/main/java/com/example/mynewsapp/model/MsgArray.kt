@@ -4,8 +4,8 @@ data class MsgArray(
     val a: String,
     val b: String,
     val bp: String,
-    val c: String,
-    val ch: String,
+    val c: String, // 0050
+    val ch: String, //0050.tw
     val d: String,
     val ex: String,
     val f: String,

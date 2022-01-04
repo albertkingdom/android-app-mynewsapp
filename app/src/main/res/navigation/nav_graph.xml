@@ -60,4 +60,8 @@
         <argument android:name="stockNo"
             app:argType="string" />
     </fragment>
+    <fragment
+        android:id="@+id/statisticFragment"
+        android:name="com.example.mynewsapp.ui.StatisticFragment"
+        android:label="Statistic" />
 </navigation>
