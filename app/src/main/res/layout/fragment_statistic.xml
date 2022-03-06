@@ -10,7 +10,17 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:layout_marginBottom="5dp"/>
+        android:layout_marginBottom="5dp"
+        android:visibility="visible"/>
+    <TextView
+        android:id="@+id/text_no_data"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:text="No History Record Is Available."
+        android:textSize="20dp"
+        android:gravity="center"
+        android:visibility="gone"/>
     <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

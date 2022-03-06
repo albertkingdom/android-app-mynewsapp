@@ -1,11 +1,13 @@
 package com.example.mynewsapp.ui
 
 import android.graphics.Color
+import android.opengl.Visibility
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.RecyclerView
@@ -14,6 +16,7 @@ import com.example.mynewsapp.R
 import com.example.mynewsapp.adapter.StatisticAdapter
 import com.example.mynewsapp.databinding.FragmentStatisticBinding
 import com.example.mynewsapp.model.StockStatistic
+import com.example.mynewsapp.util.GetDateString
 import com.example.mynewsapp.util.Resource
 import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.components.Description
@@ -29,6 +32,7 @@ class StatisticFragment: Fragment() {
     lateinit var binding: FragmentStatisticBinding
     lateinit var viewModel: NewsViewModel
     lateinit var pieChart: PieChart
+    lateinit var textRemind: TextView
     lateinit var recyclerView: RecyclerView
     private lateinit var adapter: StatisticAdapter
     companion object {
@@ -50,7 +54,7 @@ class StatisticFragment: Fragment() {
             }
 
             val sumOfAsset: Float =
-                dataSource.map { stockStatistic -> stockStatistic.totalAssets }.reduce { acc, item -> acc + item }
+                dataSource.map { stockStatistic -> stockStatistic.totalAssets }.reduce{ acc, item -> acc + item }
             //Log.d(TAG, "sumOfAsset...$sumOfAsset")
             entries = dataSource.map{ entry -> PieEntry(entry.totalAssets / sumOfAsset * 100, entry.stockNo) }
 
@@ -84,7 +88,7 @@ class StatisticFragment: Fragment() {
         viewModel =(activity as MainActivity).viewModel
         binding = FragmentStatisticBinding.inflate(inflater)
         pieChart = binding.pieChart
-
+        textRemind = binding.textNoData
         viewModel.allInvestHistoryList.observe(viewLifecycleOwner, {
             Log.d(TAG, "all history...$it")
             viewModel.calculateForPieChart()
@@ -94,16 +98,17 @@ class StatisticFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-//        viewModel.investStatistics.observe(viewLifecycleOwner, { customMap ->
-//
-//           StatisticFragment.createPieChart(customMap, pieChart)
-//        })
+
         recyclerView = binding.recyclerView
         adapter = StatisticAdapter()
         recyclerView.adapter = adapter
 
         viewModel.investStatisticsList.observe(viewLifecycleOwner, { customMap ->
-
+            if(customMap.isEmpty()){
+                textRemind.visibility = View.VISIBLE
+                pieChart.visibility = View.GONE
+                return@observe
+            }
             StatisticFragment.createPieChart(customMap, pieChart)
             adapter.submitList(customMap)
         })
