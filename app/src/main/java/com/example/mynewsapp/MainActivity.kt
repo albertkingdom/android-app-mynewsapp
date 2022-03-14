@@ -1,10 +1,6 @@
 package com.example.mynewsapp
 
-import android.app.SearchManager
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
@@ -16,10 +12,8 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.mynewsapp.databinding.ActivityMainBinding
-import com.example.mynewsapp.db.StockDatabase
-import com.example.mynewsapp.repository.NewsRepository
 import com.example.mynewsapp.ui.NewsViewModel
-import com.example.mynewsapp.ui.NewsViewModelProviderFactory
+import com.example.mynewsapp.ui.NewsViewModelFactory
 
 
 class MainActivity : AppCompatActivity() {
@@ -35,13 +29,13 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         val navView: BottomNavigationView = binding.navView
 
-        val newsRepository = NewsRepository((application as MyApplication).database.stockDao())
-        val viewModelFactory = NewsViewModelProviderFactory(newsRepository,
+       // Initialize view model ==============
+        val viewModelFactory = NewsViewModelFactory((application as MyApplication).repository,
             application as MyApplication
         )
         viewModel = ViewModelProvider(this, viewModelFactory)
             .get(NewsViewModel::class.java)
-
+        //================
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.StockNavHostFragment) as NavHostFragment
         val navController = navHostFragment.navController

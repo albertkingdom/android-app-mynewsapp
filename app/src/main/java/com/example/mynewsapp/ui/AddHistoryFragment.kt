@@ -1,7 +1,9 @@
 package com.example.mynewsapp.ui
 
 import android.os.Bundle
+import android.util.Log
 import android.view.*
+import android.widget.RadioGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -45,15 +47,6 @@ class AddHistoryFragment: Fragment() {
 
         }
 
-        binding.switchBuyOrSell.setOnCheckedChangeListener { buttonView, isChecked ->
-            if (isChecked) {
-                binding.switchBuyOrSell.text = "buy"
-            } else {
-                binding.switchBuyOrSell.text = "sell"
-
-            }
-        }
-
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -76,7 +69,8 @@ class AddHistoryFragment: Fragment() {
         val amount = binding.amount.editText?.text.toString().toIntOrNull()
         val price = binding.price.editText?.text.toString().toDoubleOrNull()
         val date = if (dateSelected != null) dateSelected else binding.calendar.date
-        val isBuy = if (binding.switchBuyOrSell.isChecked) 0 else 1
+
+        val isBuy = if (binding.radioButtonBuy.isChecked) 0 else 1
         if (stockNo.isEmpty()) {
             binding.stockNo.error = "不可為空白"
             return

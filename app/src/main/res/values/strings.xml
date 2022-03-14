@@ -26,4 +26,5 @@
 
     <string name="stockNo">代號</string>
     <string name="asset">資產總額(NT$)</string>
+    <string name="dialog_confirm_button">OK</string>
 </resources>

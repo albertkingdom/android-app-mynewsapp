@@ -17,8 +17,11 @@ import com.example.mynewsapp.model.StockStatistic
 import com.example.mynewsapp.repository.NewsRepository
 import com.example.mynewsapp.util.GetDateString
 import com.example.mynewsapp.util.Resource
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import retrofit2.Response
+
 
 class NewsViewModel(val newsRepository: NewsRepository, application: MyApplication) :
     AndroidViewModel(
@@ -36,11 +39,13 @@ class NewsViewModel(val newsRepository: NewsRepository, application: MyApplicati
 
     var investStatisticsList: MutableLiveData<List<StockStatistic>> = MutableLiveData()
 
+    var fetchPriceJob: Job? = null
     init {
         getHeadlines()
-
     }
-
+    companion object {
+        val TAG = "NewsViewModel"
+    }
 
     fun getHeadlines() {
         if (isNetworkAvailable()) {
@@ -56,22 +61,31 @@ class NewsViewModel(val newsRepository: NewsRepository, application: MyApplicati
 
     }
 
-    fun getStockPriceInfo(stockList: List<String> = viewModelStockNoList) {
-        //Log.d("model getStockPriceInfo","getStockPriceInfo")
-        if (isNetworkAvailable()) {
-            viewModelScope.launch {
-                stockPriceInfo.postValue(Resource.Loading())
+    private fun getStockPriceInfo(stockList: List<String>): Job {
+        Log.d(TAG,"getStockPriceInfo")
 
-                val stockListString: String = stockList.joinToString("|") {
-                    "tse_${it}.tw"
+            return viewModelScope.launch {
+                if (isNetworkAvailable()) {
+                    while (true) {
+
+                        stockPriceInfo.postValue(Resource.Loading())
+
+                        val stockListString: String = stockList.joinToString("|") {
+                            "tse_${it}.tw"
+                        }
+
+                        val response = newsRepository.getStockPriceInfo(stockNo = stockListString)
+                        stockPriceInfo.value = handleStockPriceInfoResponse(response)
+
+                        Log.d(TAG, "fetch for stock price")
+                        delay(1000 * 60 * 5)
+                    }
+                }  else {
+                    stockPriceInfo.postValue(Resource.Error("No Internet Connection"))
+
                 }
-                val response = newsRepository.getStockPriceInfo(stockNo = stockListString)
-                stockPriceInfo.value = handleStockPriceInfoResponse(response)
             }
-        } else {
-            stockPriceInfo.postValue(Resource.Error("No Internet Connection"))
 
-        }
     }
 
     fun getRelatedNews(stockName: String) {
@@ -97,11 +111,13 @@ class NewsViewModel(val newsRepository: NewsRepository, application: MyApplicati
         if (isNetworkAvailable()) {
             viewModelScope.launch {
                 candleStickData.postValue(Resource.Loading())
+
                 val currentMonthStr = GetDateString.outputCurrentDateString()
                 val lastMonthStr = GetDateString.outputLastMonthDateString()
                 val responseCurrentMonth =
                     newsRepository.getCandleStickData(currentMonthStr, stockNo)
                 val responseLastMonth = newsRepository.getCandleStickData(lastMonthStr, stockNo)
+
 
                 // concat multiple month candle stick data
                 val fullCandleStickDataList = concatenate(
@@ -151,7 +167,9 @@ class NewsViewModel(val newsRepository: NewsRepository, application: MyApplicati
     fun addToStockList(stockNo: String) {
 
         viewModelScope.launch {
-            newsRepository.insert(stock = Stock(0, stockNo))
+            if(!viewModelStockNoList.contains(stockNo)) {
+                newsRepository.insert(stock = Stock(0, stockNo))
+            }
         }
 
     }
@@ -163,42 +181,34 @@ class NewsViewModel(val newsRepository: NewsRepository, application: MyApplicati
     }
 
     fun getStockNoListAndToQueryStockPriceInfo(stockList: List<String> = viewModelStockNoList) {
-        //Log.d("model check!!!","getStockNoListAndToQueryStockPriceInfo")
-        if (stockList.size == viewModelStockNoList.size && stockList.containsAll(
-                viewModelStockNoList
-            )
-        ) {
+
+        if (stockList.isEmpty()){
             return
-        } else {
-            viewModelStockNoList = stockList
-            getStockPriceInfo(viewModelStockNoList)
         }
+        viewModelStockNoList = stockList //save a current stock number list copy
+
+        fetchPriceJob = getStockPriceInfo(stockList)
+
+
     }
 
-    fun isNetworkAvailable(): Boolean {
+    private fun isNetworkAvailable(): Boolean {
         //Log.d("viewmodel", "isNetworkAvailable")
         val connectivityManager =
             getApplication<MyApplication>().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val capabilities =
-                connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
-            if (capabilities != null) {
-                when {
-                    capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> {
-                        return true
-                    }
-                    capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> {
-                        return true
-                    }
-                    capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> {
-                        return true
-                    }
+        val capabilities =
+            connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
+        if (capabilities != null) {
+            when {
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> {
+                    return true
                 }
-            }
-        } else {
-            val activeNetworkInfo = connectivityManager.activeNetworkInfo
-            if (activeNetworkInfo != null && activeNetworkInfo.isConnected) {
-                return true
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> {
+                    return true
+                }
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> {
+                    return true
+                }
             }
         }
         return false
@@ -265,9 +275,13 @@ class NewsViewModel(val newsRepository: NewsRepository, application: MyApplicati
 
         //Log.d("viewmodel investStatistics", investStatistics.value.toString())
     }
+
+    fun cancelRepeatFetchPriceJob() {
+        fetchPriceJob?.cancel()
+    }
 }
 
-class NewsViewModelProviderFactory(
+class NewsViewModelFactory(
     val newsRepository: NewsRepository,
     val application: MyApplication
 ) : ViewModelProvider.Factory {

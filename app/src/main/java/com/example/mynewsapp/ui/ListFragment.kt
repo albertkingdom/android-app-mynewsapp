@@ -1,42 +1,39 @@
 package com.example.mynewsapp.ui
 
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.*
-import androidx.annotation.RequiresApi
-
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
-import androidx.lifecycle.coroutineScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mynewsapp.MainActivity
+
 import com.example.mynewsapp.R
 import com.example.mynewsapp.adapter.StockInfoAdapter
 import com.example.mynewsapp.databinding.FragmentListBinding
-import com.example.mynewsapp.db.Stock
 import com.example.mynewsapp.model.MsgArray
 import com.example.mynewsapp.util.Resource
 import com.google.android.material.snackbar.Snackbar
 
 
-
 class ListFragment : Fragment() {
     private lateinit var binding: FragmentListBinding
-    private lateinit var viewModel: NewsViewModel
+    private val viewModel: NewsViewModel by activityViewModels()
 
     private lateinit var stockAdapter: StockInfoAdapter
     private lateinit var swipeBackground: ColorDrawable
     private lateinit var deleteIcon: Drawable
+
+    val TAG = "ListFragment"
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -49,17 +46,17 @@ class ListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        Log.d(TAG, "onViewCreated")
         val recyclerView: RecyclerView = binding.stockListRecyclerview
         //change toolbar title
         (requireActivity() as AppCompatActivity).supportActionBar?.title = "自選股"
-        viewModel =(activity as MainActivity).viewModel
+
 
         stockAdapter = StockInfoAdapter(getStockNameToGetRelatedNews, toCandelStickChartFragment)
         recyclerView.adapter = stockAdapter
 
         viewModel.stockPriceInfo.observe(viewLifecycleOwner, Observer { response ->
-            //Log.d("list fragment", "observe stockpriceinfo")
+
 
             when (response) {
                 is Resource.Success -> {
@@ -177,9 +174,11 @@ class ListFragment : Fragment() {
         }).attachToRecyclerView(recyclerView)
 
         binding.swipeRefresh.setOnRefreshListener {
-            //Log.d("list fragment", "pull to refresh")
-            viewModel.getStockPriceInfo()
+
+            viewModel.cancelRepeatFetchPriceJob()
+            viewModel.getStockNoListAndToQueryStockPriceInfo()
         }
+
 
     }
 
@@ -196,7 +195,7 @@ class ListFragment : Fragment() {
         val stockNo = it.c
         val stockPrice:String = if(it.z != "-") it.z else it.y
         val stockName = it.n
-//        viewModel.getCandleStickData("", stockNo)
+
         findNavController().navigate(ListFragmentDirections.actionListFragmentToCandleStickChartFragment(stockNo,stockName,stockPrice))
     }
 
@@ -219,7 +218,15 @@ class ListFragment : Fragment() {
                 }
 
             })
+
         }
 
+
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.d(TAG, "onstop")
+        viewModel.cancelRepeatFetchPriceJob()
     }
 }

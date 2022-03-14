@@ -9,6 +9,8 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mynewsapp.R
 import com.example.mynewsapp.model.StockStatistic
+import java.text.NumberFormat
+import java.util.*
 import kotlin.math.roundToInt
 
 class StatisticAdapter: ListAdapter<StockStatistic, StatisticAdapter.StatisticViewHolder>(
@@ -19,7 +21,12 @@ class StatisticAdapter: ListAdapter<StockStatistic, StatisticAdapter.StatisticVi
 
         fun setData(data: StockStatistic){
             stockNoView.text = data.stockNo
-            assetView.text = data.totalAssets.roundToInt().toString()
+
+            val format: NumberFormat = NumberFormat.getCurrencyInstance()
+            format.maximumFractionDigits = 0
+            format.currency = Currency.getInstance("TWD")
+
+            assetView.text = format.format(data.totalAssets.roundToInt())
         }
     }
 
