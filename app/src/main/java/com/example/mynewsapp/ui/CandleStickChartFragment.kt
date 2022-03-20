@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getColor
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.mynewsapp.MainActivity
@@ -39,6 +40,7 @@ class CandleStickChartFragment: Fragment() {
 
     lateinit var binding: FragmentCandleStickChartBinding
     lateinit var viewModel: NewsViewModel
+    val chatViewModel: ChatViewModel by activityViewModels()
     private val args: CandleStickChartFragmentArgs by navArgs()
 
     lateinit var chart:CandleStickChart
@@ -60,13 +62,13 @@ class CandleStickChartFragment: Fragment() {
         binding = FragmentCandleStickChartBinding.inflate(inflater)
         chart = binding.candleStickChart
         //change toolbar title
-        (requireActivity() as AppCompatActivity).supportActionBar?.title = "${args.stockNo}"
+        (requireActivity() as AppCompatActivity).supportActionBar?.title = args.stockNo
 
         viewModel =(activity as MainActivity).viewModel
         viewModel.getCandleStickData("", args.stockNo)
         viewModel.queryHistoryByStockNo(args.stockNo)
         Log.d("candle fragment","on create view ${args.stockNo}")
-
+        chatViewModel.checkIsExistingChannel(args.stockNo)
         return binding.root
     }
 
@@ -221,7 +223,11 @@ class CandleStickChartFragment: Fragment() {
         val stockNo = args.stockNo
         findNavController().navigate(CandleStickChartFragmentDirections.actionCandleStickChartFragmentToAddHistoryFragment(stockNo))
     }
+    private fun navigateToChatFragment() {
 
+        chatViewModel.stockNo = args.stockNo
+        findNavController().navigate(CandleStickChartFragmentDirections.actionCandleStickChartFragmentToChatFragment())
+    }
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.candle_stick_chart_fragment_option_menu, menu)
     }
@@ -231,6 +237,10 @@ class CandleStickChartFragment: Fragment() {
         return when (item.itemId) {
             R.id.addButton -> {
                 navigateToAddHistoryFragment()
+                true
+            }
+            R.id.go_to_chatRoom -> {
+                navigateToChatFragment()
                 true
             }
             else -> super.onOptionsItemSelected(item)

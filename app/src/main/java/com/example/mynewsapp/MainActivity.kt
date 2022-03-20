@@ -1,6 +1,7 @@
 package com.example.mynewsapp
 
 import android.os.Bundle
+import androidx.activity.viewModels
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
@@ -12,6 +13,7 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.mynewsapp.databinding.ActivityMainBinding
+import com.example.mynewsapp.ui.ChatViewModel
 import com.example.mynewsapp.ui.NewsViewModel
 import com.example.mynewsapp.ui.NewsViewModelFactory
 
@@ -20,6 +22,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     lateinit var viewModel: NewsViewModel
+    val chatViewModel: ChatViewModel by viewModels()
     private lateinit var appBarConfiguration: AppBarConfiguration
 
     override fun onCreate(savedInstanceState: Bundle?) {

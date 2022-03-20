@@ -5,23 +5,26 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
 import android.util.Log
-import com.example.mynewsapp.model.NewsResponse
 import androidx.lifecycle.*
 import com.example.mynewsapp.MyApplication
 import com.example.mynewsapp.db.InvestHistory
 
-import com.example.mynewsapp.model.StockPriceInfoResponse
 import com.example.mynewsapp.db.Stock
-import com.example.mynewsapp.model.CandleStickData
-import com.example.mynewsapp.model.StockStatistic
+import com.example.mynewsapp.model.*
 import com.example.mynewsapp.repository.NewsRepository
 import com.example.mynewsapp.util.GetDateString
 import com.example.mynewsapp.util.Resource
+import com.google.firebase.Timestamp
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.DocumentChange
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
 import retrofit2.Response
-
+import java.util.*
+import kotlin.collections.ArrayList
 
 class NewsViewModel(val newsRepository: NewsRepository, application: MyApplication) :
     AndroidViewModel(
@@ -38,10 +41,13 @@ class NewsViewModel(val newsRepository: NewsRepository, application: MyApplicati
     val allInvestHistoryList: LiveData<List<InvestHistory>> = newsRepository.allHistory.asLiveData()
 
     var investStatisticsList: MutableLiveData<List<StockStatistic>> = MutableLiveData()
+    val db = Firebase.firestore
+    private var channelID: String? = null
 
     var fetchPriceJob: Job? = null
     init {
         getHeadlines()
+
     }
     companion object {
         val TAG = "NewsViewModel"
@@ -279,6 +285,12 @@ class NewsViewModel(val newsRepository: NewsRepository, application: MyApplicati
     fun cancelRepeatFetchPriceJob() {
         fetchPriceJob?.cancel()
     }
+
+
+
+
+
+
 }
 
 class NewsViewModelFactory(

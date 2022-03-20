@@ -37,8 +37,7 @@
     <fragment
         android:id="@+id/candleStickChartFragment"
         android:name="com.example.mynewsapp.ui.CandleStickChartFragment"
-        android:label="fragment_candle_stick_chart"
-        tools:layout="@layout/fragment_candle_stick_chart" >
+        android:label="fragment_candle_stick_chart">
         <argument
             android:name="stockNo"
             app:argType="string" />
@@ -51,6 +50,9 @@
         <action
             android:id="@+id/action_candleStickChartFragment_to_addHistoryFragment"
             app:destination="@id/addHistoryFragment" />
+        <action
+            android:id="@+id/action_candleStickChartFragment_to_chatFragment"
+            app:destination="@id/chatFragment" />
     </fragment>
     <fragment
         android:id="@+id/addHistoryFragment"
@@ -64,4 +66,9 @@
         android:id="@+id/statisticFragment"
         android:name="com.example.mynewsapp.ui.StatisticFragment"
         android:label="Statistic" />
+    <fragment
+        android:id="@+id/chatFragment"
+        android:name="com.example.mynewsapp.ui.ChatFragment"
+        android:label="fragment_chat"
+        tools:layout="@layout/fragment_chat" />
 </navigation>

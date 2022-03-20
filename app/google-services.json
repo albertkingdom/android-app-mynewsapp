@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "735156971903",
+    "project_id": "stock-app-chat-room",
+    "storage_bucket": "stock-app-chat-room.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:735156971903:android:24024623de02dc49a4924a",
+        "android_client_info": {
+          "package_name": "com.albertkingdom.mystockapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "735156971903-epnqjjvkmisp7ginl6cafq4sjiv90rbi.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA5mkKkFDvnWY_vXBIssiCsJTkxf9pjJ0s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "735156971903-epnqjjvkmisp7ginl6cafq4sjiv90rbi.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "735156971903-i0gu6itqm3frijgnvtms8d4vbgo5h86r.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.albertkingdom.MyTaiwanStock"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
