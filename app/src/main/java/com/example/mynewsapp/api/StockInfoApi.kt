@@ -4,15 +4,9 @@ import com.example.mynewsapp.model.StockPriceInfoResponse
 import retrofit2.Response
 import retrofit2.http.*
 
-data class StockNoString(
-    val str: String = "tse_2330.tw"
-)
+
 interface StockInfoApi {
-    @Headers("Content-Type: application/json")
-    @POST("stock/stockprice")
-    suspend fun getStockPriceInfobyPost(
-        @Body stockNo: StockNoString
-    ): Response<StockPriceInfoResponse>
+
 
     @GET("api/getStockInfo.jsp")
     suspend fun getStockPriceInfo(

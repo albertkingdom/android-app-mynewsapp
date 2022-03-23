@@ -11,6 +11,10 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.mynewsapp.R
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
 class NewsAdapter : ListAdapter<Article, NewsAdapter.ArticleViewHolder>(DiffCallback) {
 
@@ -49,8 +53,12 @@ class NewsAdapter : ListAdapter<Article, NewsAdapter.ArticleViewHolder>(DiffCall
             titleView.text = currentArticle.title
             descriptionView.text = currentArticle.description
             sourceView.text = currentArticle.source.name
-            publishedAtView.text = currentArticle.publishedAt
+
             Glide.with(this.itemView).load(currentArticle.urlToImage).into(articleImageView)
+            // format publishedAt time
+            val inputPattern = DateTimeFormatter.ISO_INSTANT.withZone(ZoneId.systemDefault())
+            val outputPattern = DateTimeFormatter.ofPattern("yyyy/MM/dd kk:mm")
+            publishedAtView.text = ZonedDateTime.parse(currentArticle.publishedAt, inputPattern).format(outputPattern)
 
             itemView.setOnClickListener {
 

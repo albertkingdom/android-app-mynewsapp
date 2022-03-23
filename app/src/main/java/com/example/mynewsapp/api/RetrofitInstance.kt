@@ -1,6 +1,6 @@
 package com.example.mynewsapp.api
 
-import com.example.mynewsapp.util.Constant.Companion.BASE_URL
+import com.example.mynewsapp.util.Constant.Companion.BASE_URL_NEWS
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -10,7 +10,7 @@ object RetrofitInstance {
     private val logging = HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
     private val client = OkHttpClient.Builder().addInterceptor(logging).build()
     val retrofit = Retrofit.Builder()
-        .baseUrl(BASE_URL)
+        .baseUrl(BASE_URL_NEWS)
         .addConverterFactory(GsonConverterFactory.create())
         .client(client)
         .build()

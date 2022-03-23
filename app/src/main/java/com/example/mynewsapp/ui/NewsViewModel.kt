@@ -30,7 +30,6 @@ class NewsViewModel(val newsRepository: NewsRepository, application: MyApplicati
     AndroidViewModel(
         application
     ) {
-    var page = 1
     val news: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
     val stockPriceInfo: MutableLiveData<Resource<StockPriceInfoResponse>> = MutableLiveData()
     var viewModelStockNoList = listOf<String>()
@@ -41,19 +40,14 @@ class NewsViewModel(val newsRepository: NewsRepository, application: MyApplicati
     val allInvestHistoryList: LiveData<List<InvestHistory>> = newsRepository.allHistory.asLiveData()
 
     var investStatisticsList: MutableLiveData<List<StockStatistic>> = MutableLiveData()
-    val db = Firebase.firestore
-    private var channelID: String? = null
 
     var fetchPriceJob: Job? = null
-    init {
-        getHeadlines()
 
-    }
     companion object {
-        val TAG = "NewsViewModel"
+        const val TAG = "NewsViewModel"
     }
 
-    fun getHeadlines() {
+    fun getHeadlines(page: Int = 1) {
         if (isNetworkAvailable()) {
             viewModelScope.launch {
                 news.postValue(Resource.Loading())
@@ -94,7 +88,7 @@ class NewsViewModel(val newsRepository: NewsRepository, application: MyApplicati
 
     }
 
-    fun getRelatedNews(stockName: String) {
+    fun getRelatedNews(stockName: String, page: Int = 1) {
         if (isNetworkAvailable()) {
             viewModelScope.launch {
                 news.postValue(Resource.Loading())

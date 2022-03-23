@@ -6,9 +6,13 @@ import android.graphics.Paint
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import android.widget.ImageButton
+import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getColor
+import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -17,10 +21,7 @@ import com.example.mynewsapp.MainActivity
 import com.example.mynewsapp.R
 import com.example.mynewsapp.adapter.StockHistoryAdapter
 import com.example.mynewsapp.databinding.FragmentCandleStickChartBinding
-import com.example.mynewsapp.db.InvestHistory
-//import com.example.mynewsapp.db.InvestHistory
 import com.example.mynewsapp.model.CandleStickData
-import com.example.mynewsapp.model.StockHistory
 import com.example.mynewsapp.util.Resource
 import com.github.mikephil.charting.charts.CandleStickChart
 import com.github.mikephil.charting.components.XAxis
@@ -40,7 +41,7 @@ class CandleStickChartFragment: Fragment() {
 
     lateinit var binding: FragmentCandleStickChartBinding
     lateinit var viewModel: NewsViewModel
-    val chatViewModel: ChatViewModel by activityViewModels()
+    private val chatViewModel: ChatViewModel by activityViewModels()
     private val args: CandleStickChartFragmentArgs by navArgs()
 
     lateinit var chart:CandleStickChart
@@ -48,6 +49,7 @@ class CandleStickChartFragment: Fragment() {
     val candelStickEntry = ArrayList<CandleEntry>() //y values
     lateinit var candleDataSet:CandleDataSet //y values group: values + label
     private lateinit var historyAdapter: StockHistoryAdapter
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -84,6 +86,18 @@ class CandleStickChartFragment: Fragment() {
 
         historyAdapter = StockHistoryAdapter()
         historyAdapter.setStockPrice(args.stockPrice)
+        historyAdapter.setListener { targetDate ->
+            // when clicked record, highlight the day of investing record on chart
+            //Log.d("CandleStickChartFragment", targetDate)
+
+            xLabels.forEachIndexed { index, dateString ->
+                //Log.d("CandleStickChartFragment", dateString)
+                if(dateString == targetDate){
+
+                    chart.highlightValue(index.toFloat(), 0)
+                }
+            }
+        }
         recyclerView.adapter = historyAdapter
 
         viewModel.candleStickData.observe(viewLifecycleOwner, { response ->
@@ -135,6 +149,17 @@ class CandleStickChartFragment: Fragment() {
             historyAdapter.submitList(it)
         })
 
+        binding.hideShowButton.setOnClickListener {
+            binding.chartContainer.updateLayoutParams {
+                 if(this.height == ViewGroup.LayoutParams.WRAP_CONTENT)   {
+                    this.height = 0
+                     binding.hideShowButton.setImageResource(R.drawable.ic_arrow_drop_down)
+                } else {
+                    this.height = ViewGroup.LayoutParams.WRAP_CONTENT
+                     binding.hideShowButton.setImageResource(R.drawable.ic_arrow_drop_up)
+                 }
+            }
+        }
     }
 
     /**

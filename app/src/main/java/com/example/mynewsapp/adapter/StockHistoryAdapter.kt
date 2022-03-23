@@ -2,6 +2,7 @@ package com.example.mynewsapp.adapter
 
 
 import android.graphics.Color
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,13 +24,14 @@ import java.util.*
 
 class StockHistoryAdapter: ListAdapter<InvestHistory, StockHistoryAdapter.StockHistoryViewHolder>(DiffCallback) {
     private var stockPrice: String? = null
+    private var clickItemListener: ((String) -> Unit)? = null
 
     class StockHistoryViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
-        val statusView = itemView.findViewById<TextView>(R.id.status)
-        val dateView = itemView.findViewById<TextView>(R.id.date)
-        val priceView = itemView.findViewById<TextView>(R.id.price)
-        val amountView = itemView.findViewById<TextView>(R.id.amount)
-        val revenueView = itemView.findViewById<TextView>(R.id.revenue)
+        val statusView: TextView = itemView.findViewById(R.id.status)
+        val dateView: TextView = itemView.findViewById(R.id.date)
+        val priceView: TextView = itemView.findViewById(R.id.price)
+        val amountView: TextView = itemView.findViewById(R.id.amount)
+        val revenueView: TextView = itemView.findViewById(R.id.revenue)
     }
 
     override fun onCreateViewHolder(
@@ -52,12 +54,25 @@ class StockHistoryAdapter: ListAdapter<InvestHistory, StockHistoryAdapter.StockH
             dateView.text = formatDateLong(currentHistory.date)
             priceView.text = currentHistory.price.toString()
             amountView.text = currentHistory.amount.toString()
-            revenueView.text = "${revenue}%"
+            revenueView.text = this.itemView.context.getString(R.string.stockhistory_revenue, revenue)
 
             if (revenue.toFloat() > 0) {
                 revenueView.setTextColor(Color.RED)
             }else{
                 revenueView.setTextColor(Color.GREEN)
+            }
+            // click to get the history date in 110/10/10 format
+            itemView.setOnClickListener {
+                val localDateTime = LocalDateTime.ofInstant(
+                    Instant.ofEpochMilli(currentHistory.date),TimeZone.getDefault().toZoneId())
+                val year = (localDateTime.year - 1911).toString()
+                val month = if(localDateTime.monthValue<10) "0${localDateTime.monthValue}" else localDateTime.monthValue
+                val day = localDateTime.dayOfMonth
+
+
+                if (clickItemListener != null) {
+                    clickItemListener!!("$year/$month/$day")
+                }
             }
         }
     }
@@ -89,7 +104,7 @@ class StockHistoryAdapter: ListAdapter<InvestHistory, StockHistoryAdapter.StockH
     fun setStockPrice(price: String) {
         stockPrice = price
     }
-    fun calcRevenue(price: Double): String {
+    private fun calcRevenue(price: Double): String {
         var revenueStr: String = "-"
         val stockPriceDouble = stockPrice?.toDoubleOrNull()
         if (stockPrice != "-" && stockPriceDouble != null) {
@@ -99,5 +114,8 @@ class StockHistoryAdapter: ListAdapter<InvestHistory, StockHistoryAdapter.StockH
 
         }
         return revenueStr
+    }
+    fun setListener(listener:(String) -> Unit) {
+        clickItemListener = listener
     }
 }

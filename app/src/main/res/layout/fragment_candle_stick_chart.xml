@@ -17,7 +17,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="50dp">
+            android:layout_marginBottom="30dp">
 
             <TextView
                 android:id="@+id/stockName"
@@ -57,51 +57,66 @@
                 tools:text="-3.00" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <TextView
-            android:id="@+id/date"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/stockprice_date"
-            tools:context="日期:" />
-
         <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/chart_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="vertical">
 
             <TextView
-                android:id="@+id/open"
-                android:layout_width="80dp"
+                android:id="@+id/date"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/stockprice_open"
-                tools:context="開:100" />
+                android:text="@string/stockprice_date"
+                tools:context="日期:" />
 
-            <TextView
-                android:id="@+id/close"
-                android:layout_width="80dp"
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/stockprice_close"
-                tools:context="收:100" />
+                android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/high"
-                android:layout_width="80dp"
-                android:layout_height="wrap_content"
-                android:text="@string/stockprice_high"
-                tools:context="高:100" />
+                <TextView
+                    android:id="@+id/open"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/stockprice_open"
+                    tools:context="開:100" />
 
-            <TextView
-                android:id="@+id/low"
-                android:layout_width="80dp"
-                android:layout_height="wrap_content"
-                android:text="@string/stockprice_low"
-                tools:context="低:100" />
+                <TextView
+                    android:id="@+id/close"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/stockprice_close"
+                    tools:context="收:100" />
+
+                <TextView
+                    android:id="@+id/high"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/stockprice_high"
+                    tools:context="高:100" />
+
+                <TextView
+                    android:id="@+id/low"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/stockprice_low"
+                    tools:context="低:100" />
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <com.github.mikephil.charting.charts.CandleStickChart
+                android:id="@+id/candle_stick_chart"
+                android:layout_width="match_parent"
+                android:layout_height="300dp" />
         </androidx.appcompat.widget.LinearLayoutCompat>
 
-        <com.github.mikephil.charting.charts.CandleStickChart
-            android:id="@+id/candle_stick_chart"
-            android:layout_width="match_parent"
-            android:layout_height="300dp" />
+        <ImageButton
+            android:id="@+id/hide_show_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:backgroundTint="#00000000"
+            android:src="@drawable/ic_arrow_drop_up" />
 
         <androidx.appcompat.widget.LinearLayoutCompat
             android:layout_width="match_parent"

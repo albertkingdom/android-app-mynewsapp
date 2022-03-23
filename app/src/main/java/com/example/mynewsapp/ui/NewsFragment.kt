@@ -4,10 +4,13 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.coroutineScope
 import androidx.navigation.fragment.findNavController
@@ -23,12 +26,19 @@ import kotlinx.coroutines.launch
 
 class NewsFragment : Fragment(R.layout.fragment_news) {
 
-    private lateinit var viewModel: NewsViewModel
+    private val viewModel: NewsViewModel by activityViewModels()
 
     private lateinit var binding: FragmentNewsBinding
     private lateinit var newsAdapter: NewsAdapter
 
-
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        viewModel.getHeadlines()
+        return super.onCreateView(inflater, container, savedInstanceState)
+    }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         //change toolbar title
@@ -49,7 +59,7 @@ class NewsFragment : Fragment(R.layout.fragment_news) {
         }
         recyclerView.adapter = newsAdapter
 
-        viewModel = (activity as MainActivity).viewModel
+        //viewModel = (activity as MainActivity).viewModel
 
         viewModel.news.observe(viewLifecycleOwner, Observer { response ->
             when (response) {
