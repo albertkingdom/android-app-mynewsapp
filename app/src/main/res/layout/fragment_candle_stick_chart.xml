@@ -104,7 +104,7 @@
                     tools:context="低:100" />
             </androidx.appcompat.widget.LinearLayoutCompat>
 
-            <com.github.mikephil.charting.charts.CandleStickChart
+            <com.github.mikephil.charting.charts.CombinedChart
                 android:id="@+id/candle_stick_chart"
                 android:layout_width="match_parent"
                 android:layout_height="300dp" />

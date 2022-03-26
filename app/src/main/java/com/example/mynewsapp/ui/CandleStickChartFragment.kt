@@ -1,15 +1,11 @@
 package com.example.mynewsapp.ui
 
-import android.content.Context
 import android.graphics.Color
 import android.graphics.Paint
 import android.os.Bundle
 import android.util.Log
 import android.view.*
-import android.widget.ImageButton
-import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getColor
 import androidx.core.view.updateLayoutParams
@@ -23,17 +19,18 @@ import com.example.mynewsapp.adapter.StockHistoryAdapter
 import com.example.mynewsapp.databinding.FragmentCandleStickChartBinding
 import com.example.mynewsapp.model.CandleStickData
 import com.example.mynewsapp.util.Resource
-import com.github.mikephil.charting.charts.CandleStickChart
+import com.github.mikephil.charting.charts.CombinedChart
 import com.github.mikephil.charting.components.XAxis
-import com.github.mikephil.charting.data.CandleData
-import com.github.mikephil.charting.data.CandleDataSet
-import com.github.mikephil.charting.data.CandleEntry
-import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.components.YAxis
+import com.github.mikephil.charting.data.*
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
+import com.github.mikephil.charting.formatter.LargeValueFormatter
 import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener
 import com.github.mikephil.charting.utils.EntryXComparator
 import com.google.android.material.snackbar.Snackbar
+import java.text.DecimalFormat
+import java.text.NumberFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -44,10 +41,8 @@ class CandleStickChartFragment: Fragment() {
     private val chatViewModel: ChatViewModel by activityViewModels()
     private val args: CandleStickChartFragmentArgs by navArgs()
 
-    lateinit var chart:CandleStickChart
-    val xLabels = ArrayList<String>() //x axis label list
-    val candelStickEntry = ArrayList<CandleEntry>() //y values
-    lateinit var candleDataSet:CandleDataSet //y values group: values + label
+    private lateinit var chart:CombinedChart
+    private lateinit var xLabels: List<String> //x axis label list
     private lateinit var historyAdapter: StockHistoryAdapter
 
 
@@ -88,15 +83,22 @@ class CandleStickChartFragment: Fragment() {
         historyAdapter.setStockPrice(args.stockPrice)
         historyAdapter.setListener { targetDate ->
             // when clicked record, highlight the day of investing record on chart
-            //Log.d("CandleStickChartFragment", targetDate)
 
             xLabels.forEachIndexed { index, dateString ->
                 //Log.d("CandleStickChartFragment", dateString)
                 if(dateString == targetDate){
+                    try {
+                        val highlight = Highlight(index.toFloat(), 0, -1)
+                        highlight.dataIndex = 1
+                        chart.highlightValue(highlight, false)
+                    } catch (e: Exception) {
+                        Log.e("touch history", e.toString())
+                    }
 
-                    chart.highlightValue(index.toFloat(), 0)
                 }
             }
+
+
         }
         recyclerView.adapter = historyAdapter
 
@@ -104,25 +106,18 @@ class CandleStickChartFragment: Fragment() {
             when (response) {
                 is Resource.Success -> {
                     response.data?.let { stockInfoResponse ->
-                        for ((index,day) in stockInfoResponse.data.withIndex()){
 
-                            xLabels.add(day[0])
-                            candelStickEntry.add(
-                                CandleEntry(
-                                    index.toFloat(),
-                                    day[4].toFloat(),//high
-                                    day[5].toFloat(), //low
-                                    day[3].toFloat(), //open
-                                    day[6].toFloat() //close
-                                )
-                            )
-                            initOpenCloseHighLowValue(stockInfoResponse.data.last()[7])
-                        }
-                        Collections.sort(candelStickEntry, EntryXComparator())
-                        candleDataSet = CandleDataSet(candelStickEntry, args.stockNo)
+                        generateXLabels(stockInfoResponse.data)
+                        initOpenCloseHighLowValue(stockInfoResponse.data.last()[7])
+                        val candleData = generateCandleData(stockInfoResponse.data)
+                        val barData = generateBarData(stockInfoResponse.data)
 
-                        initCandleDataFormat()
-                        chart.data = CandleData(candleDataSet)
+                        val combinedData = CombinedData()
+                        combinedData.setData(candleData)
+                        combinedData.setData(barData)
+                        chart.data = combinedData
+
+
                         initXFormat()
                         initChartFormat()
 
@@ -161,6 +156,51 @@ class CandleStickChartFragment: Fragment() {
             }
         }
     }
+    private fun generateXLabels(data: List<List<String>>) {
+        xLabels = data.map { day->
+            day[0]
+        }
+    }
+    private fun generateCandleData(data: List<List<String>>): CandleData {
+        val candleStickEntry = data.mapIndexed { index, day ->
+
+                CandleEntry(
+                    index.toFloat(),
+                    day[4].toFloat(),//high
+                    day[5].toFloat(), //low
+                    day[3].toFloat(), //open
+                    day[6].toFloat() //close
+                )
+
+        }
+        val candleDataSet = CandleDataSet(candleStickEntry, args.stockNo)
+        candleDataSet.apply {
+            //shadowColor = getColor(requireContext(),R.color.black)
+            decreasingColor = getColor(requireContext(),R.color.green)
+            increasingColor = getColor(requireContext(),R.color.red)
+            decreasingPaintStyle = Paint.Style.FILL
+            increasingPaintStyle = Paint.Style.FILL
+            setDrawValues(false)
+            shadowColorSameAsCandle = true
+            axisDependency = YAxis.AxisDependency.LEFT
+        }
+        val candleData = CandleData(candleDataSet)
+        return candleData
+    }
+    private fun generateBarData(data: List<List<String>>): BarData {
+        val barEntries = data.mapIndexed { index, day ->
+            BarEntry(index.toFloat(), NumberFormat.getInstance().parse(day[2]).toFloat())
+        }
+        val barDataSet = BarDataSet(barEntries, "volume")
+        barDataSet.apply {
+            axisDependency = YAxis.AxisDependency.RIGHT
+            setDrawValues(false)
+            color = Color.LTGRAY
+
+        }
+        val barData = BarData(barDataSet)
+        return barData
+    }
 
     /**
      * format x label data
@@ -173,26 +213,10 @@ class CandleStickChartFragment: Fragment() {
             setDrawGridLines(false)
         }
         chart.setDrawBorders(true)
-        chart.axisRight.isEnabled = false
 
 
     }
 
-    /**
-     * format data set: color, style of each candle
-     */
-    private fun initCandleDataFormat(){
-        candleDataSet.apply {
-            //shadowColor = getColor(requireContext(),R.color.black)
-            decreasingColor = getColor(requireContext(),R.color.green)
-            increasingColor = getColor(requireContext(),R.color.red)
-            decreasingPaintStyle = Paint.Style.FILL
-            increasingPaintStyle = Paint.Style.FILL
-            setDrawValues(false)
-            shadowColorSameAsCandle = true
-        }
-
-    }
     private fun initChartFormat(){
         chart.extraBottomOffset = 50F
         chart.apply{
@@ -201,7 +225,13 @@ class CandleStickChartFragment: Fragment() {
             //右下方description label
             description.isEnabled = false
             setScaleEnabled(false)
-
+            axisRight.isEnabled = true
+            axisRight.setDrawGridLines(false)
+            axisRight.valueFormatter = LargeValueFormatter()
+            axisRight.axisMaximum = barData.yMax * 10
+            drawOrder = arrayOf(CombinedChart.DrawOrder.BAR, CombinedChart.DrawOrder.CANDLE)
+            barData.isHighlightEnabled = false
+            candleData.isHighlightEnabled = true
         }
     }
     /**
