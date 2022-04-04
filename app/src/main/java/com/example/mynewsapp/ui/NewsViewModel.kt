@@ -34,7 +34,7 @@ class NewsViewModel(val newsRepository: NewsRepository, application: MyApplicati
     val stockPriceInfo: MutableLiveData<Resource<StockPriceInfoResponse>> = MutableLiveData()
     var viewModelStockNoList = listOf<String>()
     val allStocksFromdb: LiveData<List<Stock>> = newsRepository.allstocks.asLiveData()
-    val candleStickData: MutableLiveData<Resource<CandleStickData>> = MutableLiveData()
+    val candleStickData: MutableLiveData<Resource<CandleStickData>?> = MutableLiveData()
 
     var investHistoryList: LiveData<List<InvestHistory>> = MutableLiveData<List<InvestHistory>>()
     val allInvestHistoryList: LiveData<List<InvestHistory>> = newsRepository.allHistory.asLiveData()
@@ -291,7 +291,7 @@ class NewsViewModelFactory(
     val newsRepository: NewsRepository,
     val application: MyApplication
 ) : ViewModelProvider.Factory {
-    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return NewsViewModel(newsRepository, application) as T
     }
 }
