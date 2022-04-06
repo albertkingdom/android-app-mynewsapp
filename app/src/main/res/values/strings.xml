@@ -29,4 +29,7 @@
     <string name="dialog_confirm_button">OK</string>
 
     <string name="stockhistory_revenue">%1$s%%</string>
+
+<!--    widget -->
+    <string name="widget_update_time">更新時間：%1$s</string>
 </resources>
