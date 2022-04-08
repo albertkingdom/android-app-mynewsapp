@@ -25,7 +25,7 @@ class CustomDialogFragment : DialogFragment() {
     override fun onStart() {
         super.onStart()
         // setup the width and height of dialog
-        dialog?.window?.setLayout(WRAP_CONTENT, 800)
+        dialog?.window?.setLayout(WRAP_CONTENT, WRAP_CONTENT)
 
     }
 

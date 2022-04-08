@@ -22,6 +22,7 @@ import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
+import okio.EOFException
 import retrofit2.Response
 import java.util.*
 import kotlin.collections.ArrayList
@@ -73,9 +74,13 @@ class NewsViewModel(val newsRepository: NewsRepository, application: MyApplicati
                         val stockListString: String = stockList.joinToString("|") {
                             "tse_${it}.tw"
                         }
-
-                        val response = newsRepository.getStockPriceInfo(stockNo = stockListString)
-                        stockPriceInfo.value = handleStockPriceInfoResponse(response)
+                        try {
+                            val response =
+                                newsRepository.getStockPriceInfo(stockNo = stockListString)
+                            stockPriceInfo.value = handleStockPriceInfoResponse(response)
+                        } catch (e: EOFException) {
+                            e.printStackTrace()
+                        }
 
                         Log.d(TAG, "fetch for stock price")
                         delay(1000 * 60 * 5)
