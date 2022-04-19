@@ -6,14 +6,17 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface StockDao {
 
-    @Query("SELECT * FROM stockList")
+    @Query("SELECT * FROM stocks")
     fun getAllStocks(): Flow<List<Stock>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(stock:Stock)
 
-    @Query("DELETE FROM stockList WHERE stockNo = :stockNumberToDel")
+    @Query("DELETE FROM stocks WHERE stockNo = :stockNumberToDel")
     suspend fun delete(stockNumberToDel:String)
+
+    @Query("DELETE FROM stocks WHERE stockNo = :stockNo AND parentFollowingListId = :followingListId")
+    suspend fun deleteStockByStockNoAndListId(stockNo: String, followingListId: Int)
 
     @Query("SELECT * FROM investHistory")
     fun getAllHistory(): Flow<List<InvestHistory>>
@@ -26,4 +29,25 @@ interface StockDao {
 
     @Query("DELETE FROM investHistory WHERE stockNo = :stockNo")
     suspend fun deleteAllHistory(stockNo:String)
+
+    // Following List
+    @Query("SELECT * FROM followingList")
+    fun getAllFollowingList(): Flow<List<FollowingList>>
+
+    @Insert
+    suspend fun insertFollowingList(followingList: FollowingList)
+
+    @Query("DELETE FROM followingList WHERE followingListId = :followingListId")
+    suspend fun deleteFollowingList(followingListId: Int)
+
+    @Query("DELETE FROM stocks WHERE parentFollowingListId = :followingListId")
+    suspend fun deleteStockAfterDeleteFollowingList(followingListId: Int)
+
+    @Transaction
+    @Query("SELECT * FROM followingList WHERE followingListId = :followingListId")
+    suspend fun getListsWithStocks(followingListId: Int): FollowingListWithStock
+
+    @Transaction
+    @Query("SELECT * FROM followingList")
+    suspend fun getAllListsWithStocks(): List<FollowingListWithStock>
 }

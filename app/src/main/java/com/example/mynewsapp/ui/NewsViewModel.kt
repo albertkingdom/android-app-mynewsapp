@@ -3,10 +3,11 @@ package com.example.mynewsapp.ui
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import android.os.Build
 import android.util.Log
 import androidx.lifecycle.*
 import com.example.mynewsapp.MyApplication
+import com.example.mynewsapp.db.FollowingList
+import com.example.mynewsapp.db.FollowingListWithStock
 import com.example.mynewsapp.db.InvestHistory
 
 import com.example.mynewsapp.db.Stock
@@ -14,27 +15,24 @@ import com.example.mynewsapp.model.*
 import com.example.mynewsapp.repository.NewsRepository
 import com.example.mynewsapp.util.GetDateString
 import com.example.mynewsapp.util.Resource
-import com.google.firebase.Timestamp
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import com.google.firebase.firestore.CollectionReference
-import com.google.firebase.firestore.DocumentChange
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
 import okio.EOFException
 import retrofit2.Response
-import java.util.*
 import kotlin.collections.ArrayList
 
 class NewsViewModel(val newsRepository: NewsRepository, application: MyApplication) :
     AndroidViewModel(
         application
     ) {
+    val currentSelectedFollowingListId: MutableLiveData<Int> = MutableLiveData(1)
     val news: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
     val stockPriceInfo: MutableLiveData<Resource<StockPriceInfoResponse>> = MutableLiveData()
     var viewModelStockNoList = listOf<String>()
     val allStocksFromdb: LiveData<List<Stock>> = newsRepository.allstocks.asLiveData()
+    val allFollowingListWithStock: MutableLiveData<List<FollowingListWithStock>> = MutableLiveData()
+    val allFollowingList: LiveData<List<FollowingList>> = newsRepository.allFollowingList.asLiveData()
     val candleStickData: MutableLiveData<Resource<CandleStickData>?> = MutableLiveData()
 
     var investHistoryList: LiveData<List<InvestHistory>> = MutableLiveData<List<InvestHistory>>()
@@ -48,6 +46,31 @@ class NewsViewModel(val newsRepository: NewsRepository, application: MyApplicati
         const val TAG = "NewsViewModel"
     }
 
+    fun createFollowingList(followingList: FollowingList) {
+        viewModelScope.launch {
+            newsRepository.insertFollowingList(followingList)
+
+        }
+    }
+
+    fun getOneFollowingListWithStocks(followingListId: Int = currentSelectedFollowingListId.value!!) {
+        fetchPriceJob?.cancel() // cancel previous timer
+        viewModelScope.launch {
+            val result = newsRepository.getOneListWithStocks(followingListId)
+            println("getOneFollowingListWithStocks $result")
+
+            if (result !== null) {
+                val stockNoStringList = result.stocks.map { stock -> stock.stockNo }
+                getStockNoListAndToQueryStockPriceInfo(stockNoStringList)
+            }
+        }
+    }
+
+    fun deleteFollowingList(followingListId: Int) {
+        viewModelScope.launch {
+            newsRepository.deleteFollowingList(followingListId)
+        }
+    }
     fun getHeadlines(page: Int = 1) {
         if (isNetworkAvailable()) {
             viewModelScope.launch {
@@ -169,25 +192,26 @@ class NewsViewModel(val newsRepository: NewsRepository, application: MyApplicati
         return Resource.Error(response.message())
     }
 
-    fun addToStockList(stockNo: String) {
+    fun addToStockList(stockNo: String, followingListId: Int) {
 
         viewModelScope.launch {
-            if(!viewModelStockNoList.contains(stockNo)) {
-                newsRepository.insert(stock = Stock(0, stockNo))
-            }
+
+            println("addToStockList stockNo = $stockNo")
+            newsRepository.insert(stock = Stock(0, stockNo, followingListId))
+
         }
 
     }
 
-    fun deleteStock(stockNo: String) {
+    fun deleteStockByStockNoAndListId(stockNo: String, followingListId: Int = currentSelectedFollowingListId.value!!) {
         viewModelScope.launch {
-            newsRepository.delStock(stockNo)
+            newsRepository.deleteStockByStockNoAndListId(stockNo, followingListId)
         }
     }
-
     fun getStockNoListAndToQueryStockPriceInfo(stockList: List<String> = viewModelStockNoList) {
 
         if (stockList.isEmpty()){
+            stockPriceInfo.postValue(Resource.Success(StockPriceInfoResponse(listOf())))
             return
         }
         viewModelStockNoList = stockList //save a current stock number list copy

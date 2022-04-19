@@ -28,5 +28,5 @@
         android:src="@drawable/ic_add"
         app:tint="?attr/colorPrimary"
         app:backgroundTint="?attr/colorOnPrimary"
-        android:contentDescription="ADD" />
+        />
 </androidx.constraintlayout.widget.ConstraintLayout>

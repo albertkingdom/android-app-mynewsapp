@@ -1,13 +1,11 @@
 package com.example.mynewsapp.ui
 
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import androidx.fragment.app.DialogFragment
 import com.example.mynewsapp.R
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.*
 import androidx.fragment.app.activityViewModels
@@ -20,7 +18,7 @@ class CustomDialogFragment : DialogFragment() {
      */
     val TAG = "CustomDialogFragment"
     private val viewModel: NewsViewModel by activityViewModels()
-
+    //var followingListId: Int = 1
 
     override fun onStart() {
         super.onStart()
@@ -50,11 +48,12 @@ class CustomDialogFragment : DialogFragment() {
         dialog?.setTitle("加入追蹤")
 
         val confirmButton = view.findViewById<Button>(R.id.confirm_button)
-        confirmButton.setOnClickListener { view ->
+        confirmButton.setOnClickListener { _ ->
 
             val stockNoInput = textView.text.toString().split(" ")[0]
             if(stockNoInput.isNotEmpty()) {
-                viewModel.addToStockList(stockNoInput)
+                viewModel.addToStockList(stockNoInput, viewModel.currentSelectedFollowingListId.value!!)
+                viewModel.getOneFollowingListWithStocks()
                 dismiss()
 
             }

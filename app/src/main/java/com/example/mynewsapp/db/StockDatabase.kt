@@ -1,12 +1,16 @@
 package com.example.mynewsapp.db
 
 import android.content.Context
-import androidx.room.AutoMigration
-import androidx.room.Database
-import androidx.room.Room
-import androidx.room.RoomDatabase
+import androidx.room.*
+import androidx.room.migration.AutoMigrationSpec
+import androidx.sqlite.db.SupportSQLiteDatabase
 
-@Database(entities = [Stock::class, InvestHistory::class], version = 2, autoMigrations = [AutoMigration (from = 1, to = 2)], exportSchema = true)
+@Database(
+    entities = [Stock::class, InvestHistory::class, FollowingList::class],
+    version = 3,
+    autoMigrations = [AutoMigration (from = 2, to = 3, spec = StockDatabase.MyExampleAutoMigration::class)],
+    exportSchema = true
+)
 abstract class StockDatabase:RoomDatabase() {
 
     abstract fun stockDao(): StockDao
@@ -28,6 +32,15 @@ abstract class StockDatabase:RoomDatabase() {
                 // return instance
                 instance
             }
+        }
+    }
+
+
+    @RenameTable(fromTableName = "stockList", toTableName = "stocks")
+    class MyExampleAutoMigration : AutoMigrationSpec {
+        @Override
+        override fun onPostMigrate(db: SupportSQLiteDatabase) {
+            // Invoked once auto migration is done
         }
     }
 }

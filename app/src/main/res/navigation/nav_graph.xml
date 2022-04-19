@@ -16,6 +16,9 @@
         <action
             android:id="@+id/action_listFragment_to_candleStickChartFragment"
             app:destination="@id/candleStickChartFragment" />
+        <action
+            android:id="@+id/action_listFragment_to_editFollowingListFragment"
+            app:destination="@id/editFollowingListFragment" />
     </fragment>
     <fragment
         android:id="@+id/newsFragment"
@@ -71,4 +74,9 @@
         android:name="com.example.mynewsapp.ui.ChatFragment"
         android:label="fragment_chat"
         tools:layout="@layout/fragment_chat" />
+    <fragment
+        android:id="@+id/editFollowingListFragment"
+        android:name="com.example.mynewsapp.ui.EditFollowingListFragment"
+        android:label="fragment_edit_following_list"
+        tools:layout="@layout/fragment_edit_following_list" />
 </navigation>

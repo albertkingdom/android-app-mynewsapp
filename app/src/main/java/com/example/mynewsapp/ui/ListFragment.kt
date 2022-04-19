@@ -1,6 +1,5 @@
 package com.example.mynewsapp.ui
 
-import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
@@ -20,11 +19,13 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.example.mynewsapp.MainActivity
 import com.example.mynewsapp.StockAppWidgetProvider
 
 import com.example.mynewsapp.R
 import com.example.mynewsapp.adapter.StockInfoAdapter
 import com.example.mynewsapp.databinding.FragmentListBinding
+import com.example.mynewsapp.db.FollowingList
 import com.example.mynewsapp.model.MsgArray
 import com.example.mynewsapp.model.WidgetStockData
 import com.example.mynewsapp.util.Resource
@@ -50,6 +51,7 @@ class ListFragment : Fragment() {
     ): View? {
         binding = FragmentListBinding.inflate(inflater, container, false)
         setHasOptionsMenu(true)
+
         return binding.root
     }
 
@@ -86,6 +88,7 @@ class ListFragment : Fragment() {
                     binding.swipeRefresh.isRefreshing = false
                 }
                 is Resource.Error -> {
+
                     response.message?.let { message ->
                         Log.e("stock list fragment", "An error occured: $message")
                         Snackbar.make(view, "An error occured: $message", Snackbar.LENGTH_LONG).show()
@@ -98,18 +101,24 @@ class ListFragment : Fragment() {
 
         })
 
-        viewModel.allStocksFromdb.observe(viewLifecycleOwner, {
-            //Log.d("list fragment", "observe allstocksfromdb")
-            /**
-             * 1. observe the allstocks
-             * 2. map to get List<StockNo>
-             * 3. call getStockPriceInfo() with List<stockNo>
-             */
-            val stockList:List<String> = it.map { stock ->
-                stock.stockNo
-            }.toSet().toList()
-            viewModel.getStockNoListAndToQueryStockPriceInfo(stockList)
+        // get following lists and stocks
+        viewModel.allFollowingList.observe(viewLifecycleOwner, { lists ->
+            println("allFollowingListWithStock $lists")
+            if (lists.isEmpty()) {
+                val followingList = FollowingList(followingListId = 0,listName = "Default")
+                viewModel.createFollowingList(followingList)
+            }
+            if (lists.isNotEmpty()) {
+                viewModel.currentSelectedFollowingListId.postValue(lists.first().followingListId)
+            }
+            (activity as MainActivity).showMenuSelectorBtn(lists)
 
+
+        })
+        // observe selected list id and get
+        viewModel.currentSelectedFollowingListId.observe(viewLifecycleOwner, { listId ->
+            println("currentSelectedFollowingListId  $listId")
+            viewModel.getOneFollowingListWithStocks(listId)
         })
 
         binding.floatingBtn.setOnClickListener {
@@ -135,9 +144,14 @@ class ListFragment : Fragment() {
 
                 val currentStockItem = stockAdapter.currentList[viewHolder.adapterPosition]
 
-                viewModel.deleteStock(currentStockItem.c)
+                //viewModel.deleteStock(currentStockItem.c)
+                viewModel.deleteStockByStockNoAndListId(currentStockItem.c)
                 viewModel.deleteAllHistory(currentStockItem.c)
                 Snackbar.make(view, "追蹤股票代號已刪除",Snackbar.LENGTH_LONG).show()
+
+                viewModel.getOneFollowingListWithStocks()
+                stockAdapter.notifyItemChanged(viewHolder.layoutPosition)
+//                stockAdapter.notifyDataSetChanged()
             }
 
 
@@ -263,5 +277,6 @@ class ListFragment : Fragment() {
         super.onStop()
         Log.d(TAG, "onstop")
         viewModel.cancelRepeatFetchPriceJob()
+        (activity as MainActivity).hideMenuSelectorBtn()
     }
 }

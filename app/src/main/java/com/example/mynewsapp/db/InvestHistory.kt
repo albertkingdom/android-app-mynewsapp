@@ -1,15 +1,15 @@
 package com.example.mynewsapp.db
 
-import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import java.util.*
 
-@Entity(tableName = "stocks")
-data class Stock (
+@Entity(tableName = "investHistory")
+data class InvestHistory (
     @PrimaryKey(autoGenerate = true)
     val id: Int,
     val stockNo: String,
-    @ColumnInfo(defaultValue = "0")
-    val parentFollowingListId: Int
+    val date: Long,
+    val price: Double,
+    val amount: Int,
+    val status: Int //0: buy, 1: sell
 )
