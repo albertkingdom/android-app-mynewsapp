@@ -285,18 +285,21 @@ class NewsViewModel(val newsRepository: NewsRepository, application: MyApplicati
 
         stockPriceInfo.value?.data?.msgArray?.map {
 
-            mapOfStockNoToCurrentPrice[it.c] = (if (it.z != "-") it.z else it.y).toFloat()
+            mapOfStockNoToCurrentPrice[it.stockNo] = (if (it.currentPrice != "-") it.currentPrice else it.lastDayPrice).toFloat()
         }
         //Log.d("viewmodel mapOfCurrentPrice", mapOfCurrentPrice.toString())
 
         mapOfStockNoToAmount.map { entry ->
-            mapOfStockNoToTotalMoney[entry.key] =
-                entry.value * mapOfStockNoToCurrentPrice[entry.key]!!
+            if (mapOfStockNoToCurrentPrice[entry.key] != null) {
+                mapOfStockNoToTotalMoney[entry.key] =
+                    entry.value * mapOfStockNoToCurrentPrice[entry.key]!!
+            }
 
         }
-        investStatisticsList.value = mapOfStockNoToAmount.map { entry ->
 
-            StockStatistic(entry.key, entry.value * mapOfStockNoToCurrentPrice[entry.key]!!)
+
+        investStatisticsList.value = mapOfStockNoToTotalMoney.map { entry ->
+            StockStatistic(entry.key, entry.value)
         }
         //Log.d("viewmodel mapOfTotalMoney", mapOfStockNoToTotalMoney.toString())
 

@@ -33,6 +33,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 
 
 class ListFragment : Fragment() {
@@ -77,7 +78,7 @@ class ListFragment : Fragment() {
                         stockAdapter.setData(stockInfoResponse.msgArray.toMutableList())
 
                         val listOfWidgetStockData = listOfMsgArray.map { msgArray ->
-                            WidgetStockData(stockNo = msgArray.c, stockPrice = msgArray.z, stockName = msgArray.n, yesterDayPrice = msgArray.y)
+                            WidgetStockData(stockNo = msgArray.stockNo, stockPrice = msgArray.currentPrice, stockName = msgArray.stockName, yesterDayPrice = msgArray.lastDayPrice)
                         }
 
                         updateWidget(listOfWidgetStockData)
@@ -145,8 +146,8 @@ class ListFragment : Fragment() {
                 val currentStockItem = stockAdapter.currentList[viewHolder.adapterPosition]
 
                 //viewModel.deleteStock(currentStockItem.c)
-                viewModel.deleteStockByStockNoAndListId(currentStockItem.c)
-                viewModel.deleteAllHistory(currentStockItem.c)
+                viewModel.deleteStockByStockNoAndListId(currentStockItem.stockNo)
+                viewModel.deleteAllHistory(currentStockItem.stockNo)
                 Snackbar.make(view, "追蹤股票代號已刪除",Snackbar.LENGTH_LONG).show()
 
                 viewModel.getOneFollowingListWithStocks()
@@ -218,16 +219,16 @@ class ListFragment : Fragment() {
 
     private val getStockNameToGetRelatedNews:(stockContent: MsgArray)->Unit = { stockContent->
 
-        val stockName = stockContent.n
+        val stockName = stockContent.stockName
         viewModel.getRelatedNews(stockName)
         findNavController().navigate(ListFragmentDirections.actionListFragmentToNewsFragment())
     }
 
     private val toCandelStickChartFragment:(stockContent: MsgArray) -> Unit = {
 
-        val stockNo = it.c
-        val stockPrice:String = if(it.z != "-") it.z else it.y
-        val stockName = it.n
+        val stockNo = it.stockNo
+        val stockPrice:String = if(it.currentPrice != "-") it.currentPrice else it.lastDayPrice
+        val stockName = it.stockName
 
         findNavController().navigate(ListFragmentDirections.actionListFragmentToCandleStickChartFragment(stockNo,stockName,stockPrice))
     }
@@ -240,8 +241,10 @@ class ListFragment : Fragment() {
 
          // Write stock price info to shared preference
          val sharedPref = activity?.getSharedPreferences("sharedPref", Context.MODE_PRIVATE) ?: return
-         val moshi = Moshi.Builder().build()
+         val moshi = Moshi.Builder()
+             .build()
          val jsonAdapter: JsonAdapter<List<WidgetStockData>> = moshi.adapter(Types.newParameterizedType(List::class.java, WidgetStockData::class.java))
+
          val jsonString = jsonAdapter.toJson(listOfWidgetStockData)
          with (sharedPref.edit()) {
              putString("sharedPref1", jsonString)

@@ -1,41 +1,18 @@
 package com.example.mynewsapp.model
 
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
+
+@JsonClass(generateAdapter = true)
 data class MsgArray(
-    val a: String,
-    val b: String,
-    val bp: String,
-    val c: String, // 0050
+
+    @Json(name = "c")
+    val stockNo: String, // 0050
     val ch: String, //0050.tw
-    val d: String,
-    val ex: String,
-    val f: String,
-    val fv: String,
-    val g: String,
-    val h: String,
-    val i: String,
-    val ip: String,
-    val `it`: String,
-    val l: String,
-    val mt: String,
-    val n: String,
-    val nf: String,
-    val o: String,
-    val oa: String,
-    val ob: String,
-    val ot: String,
-    val ov: String,
-    val oz: String,
-    val p: String,
-    val ps: String,
-    val pz: String,
-    val s: String,
-    val t: String,
-    val tlong: String,
-    val ts: String,
-    val tv: String,
-    val u: String,
-    val v: String,
-    val w: String,
-    val y: String,
-    val z: String
+    @Json(name = "y")
+    val lastDayPrice: String,
+    @Json(name = "z")
+    val currentPrice: String,
+    @Json(name = "n")
+    val stockName: String
 )

@@ -23,7 +23,7 @@ class StockInfoAdapter(val onClick: (Stock: MsgArray)->Unit, val toCandleStickCh
     companion object {
         private val DiffCallback = object : DiffUtil.ItemCallback<MsgArray>(){
             override fun areItemsTheSame(oldItem: MsgArray, newItem: MsgArray): Boolean {
-                return oldItem.c == newItem.c
+                return oldItem.stockNo == newItem.stockNo
             }
 
             override fun areContentsTheSame(oldItem: MsgArray, newItem: MsgArray): Boolean {
@@ -49,10 +49,10 @@ class StockInfoAdapter(val onClick: (Stock: MsgArray)->Unit, val toCandleStickCh
         val currentStock = getItem(position)
 
         ItemStockinfoBinding.bind(holder.itemView).apply {
-            stockNo.text = currentStock.c
-            stockName.text = currentStock.n
+            stockNo.text = currentStock.stockNo
+            stockName.text = currentStock.stockName
             stockPrice.text = String.format("%.2f",handleStockPrice(currentStock).toFloat())
-            val diff = handleStockPrice(currentStock).toFloat() - currentStock.y.toFloat()
+            val diff = handleStockPrice(currentStock).toFloat() - currentStock.lastDayPrice.toFloat()
 
 
             if(diff<0f) {
@@ -93,10 +93,10 @@ class StockInfoAdapter(val onClick: (Stock: MsgArray)->Unit, val toCandleStickCh
 
     }
     private fun handleStockPrice(currentStock: MsgArray):String{
-        return if(currentStock.z == "-"){
-            currentStock.y
+        return if(currentStock.currentPrice == "-"){
+            currentStock.lastDayPrice
         }else{
-            currentStock.z
+            currentStock.currentPrice
         }
     }
 // to filter with searchview in list fragment
@@ -112,7 +112,7 @@ class StockInfoAdapter(val onClick: (Stock: MsgArray)->Unit, val toCandleStickCh
 
             } else {
                 for (item in list) {
-                    if (item.c.contains(constraint)) {
+                    if (item.stockNo.contains(constraint)) {
                         filteredList.add(item)
                     }
                 }
