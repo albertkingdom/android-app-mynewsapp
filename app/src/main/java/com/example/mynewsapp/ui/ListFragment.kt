@@ -10,7 +10,6 @@ import android.os.Bundle
 
 import android.util.Log
 import android.view.*
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -33,7 +32,6 @@ import com.google.android.material.snackbar.Snackbar
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 
 
 class ListFragment : Fragment() {
@@ -61,7 +59,7 @@ class ListFragment : Fragment() {
         Log.d(TAG, "onViewCreated")
         val recyclerView: RecyclerView = binding.stockListRecyclerview
         //change toolbar title
-        (requireActivity() as AppCompatActivity).supportActionBar?.title = "自選股"
+//        (requireActivity() as AppCompatActivity).supportActionBar?.title = "自選股"
 
 
         stockAdapter = StockInfoAdapter(getStockNameToGetRelatedNews, toCandelStickChartFragment)
@@ -123,7 +121,7 @@ class ListFragment : Fragment() {
         })
 
         binding.floatingBtn.setOnClickListener {
-            val dialog = CustomDialogFragment()
+            val dialog = AddStockDialogFragment()
 
             dialog.show(parentFragmentManager,"stock")
         }
@@ -219,9 +217,9 @@ class ListFragment : Fragment() {
 
     private val getStockNameToGetRelatedNews:(stockContent: MsgArray)->Unit = { stockContent->
 
-        val stockName = stockContent.stockName
-        viewModel.getRelatedNews(stockName)
-        findNavController().navigate(ListFragmentDirections.actionListFragmentToNewsFragment())
+//        val stockName = stockContent.stockName
+//        viewModel.getRelatedNews(stockName)
+//        findNavController().navigate(ListFragmentDirections.actionListFragmentToNewsFragment())
     }
 
     private val toCandelStickChartFragment:(stockContent: MsgArray) -> Unit = {
@@ -231,6 +229,7 @@ class ListFragment : Fragment() {
         val stockName = it.stockName
 
         findNavController().navigate(ListFragmentDirections.actionListFragmentToCandleStickChartFragment(stockNo,stockName,stockPrice))
+
     }
      private fun updateWidget(listOfWidgetStockData: List<WidgetStockData>) {
          // Send broadcast to widgetProvider to invoke onRecieve method

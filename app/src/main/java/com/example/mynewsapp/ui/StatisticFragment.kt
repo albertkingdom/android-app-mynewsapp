@@ -73,7 +73,7 @@ class StatisticFragment: Fragment() {
             targetChart.data = pieData
             targetChart.setUsePercentValues(true) // display % on chart
             targetChart.invalidate() //refresh
-
+            targetChart.legend.isEnabled = false
             val description = Description() // @ bottom right of chart
             description.text = "" // remove description
             targetChart.description = description

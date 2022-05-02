@@ -48,7 +48,7 @@ class CandleStickChartFragment: Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //Log.d("candle fragment","onCreate")
+        Log.d("candle fragment","onCreate")
         setHasOptionsMenu(true)
     }
     override fun onCreateView(
@@ -107,16 +107,15 @@ class CandleStickChartFragment: Fragment() {
                 is Resource.Success -> {
                     response.data?.let { stockInfoResponse ->
 
-                        generateXLabels(stockInfoResponse.data)
-                        initOpenCloseHighLowValue(stockInfoResponse.data.last()[7])
-                        val candleData = generateCandleData(stockInfoResponse.data)
-                        val barData = generateBarData(stockInfoResponse.data)
 
+                        generateXLabels(stockInfoResponse)
+                        initOpenCloseHighLowValue(stockInfoResponse.last()[7])
+                        val candleData = generateCandleData(stockInfoResponse)
+                        val barData = generateBarData(stockInfoResponse)
                         val combinedData = CombinedData()
                         combinedData.setData(candleData)
                         combinedData.setData(barData)
                         chart.data = combinedData
-
 
                         initXFormat()
                         initChartFormat()
@@ -237,17 +236,18 @@ class CandleStickChartFragment: Fragment() {
     /**
      * click chart to show detail
      */
-    private fun setupClickChart(alldatas: CandleStickData){
+    private fun setupClickChart(alldatas: List<List<String>>){
         chart.setOnChartValueSelectedListener(object:OnChartValueSelectedListener{
             override fun onValueSelected(e: Entry?, h: Highlight?) {
                 //e : x:index,y: y value clicked
 
+
                 val index = e!!.x.toInt()
-                val openValue = alldatas.data[index][3]
-                val closeValue = alldatas.data[index][6]
-                val highValue = alldatas.data[index][4]
-                val lowValue = alldatas.data[index][5]
-                val selectedDate = alldatas.data[index][0]
+                val openValue = alldatas[index][3]
+                val closeValue = alldatas[index][6]
+                val highValue = alldatas[index][4]
+                val lowValue = alldatas[index][5]
+                val selectedDate = alldatas[index][0]
                 binding.apply {
                     open.text = getString(R.string.stockprice_open, openValue)
                     close.text = getString(R.string.stockprice_close, closeValue)
@@ -255,6 +255,8 @@ class CandleStickChartFragment: Fragment() {
                     low.text = getString(R.string.stockprice_low, lowValue)
                     date.text = getString(R.string.stockprice_date, selectedDate)
                 }
+
+
             }
 
             override fun onNothingSelected() {
@@ -284,6 +286,7 @@ class CandleStickChartFragment: Fragment() {
         findNavController().navigate(CandleStickChartFragmentDirections.actionCandleStickChartFragmentToChatFragment())
     }
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.candle_stick_chart_fragment_option_menu, menu)
     }
 
@@ -291,6 +294,7 @@ class CandleStickChartFragment: Fragment() {
 
         return when (item.itemId) {
             R.id.addButton -> {
+                print("go to add history")
                 navigateToAddHistoryFragment()
                 true
             }

@@ -3,80 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/listFragment">
-
-    <fragment
-        android:id="@+id/listFragment"
-        android:name="com.example.mynewsapp.ui.ListFragment"
-        android:label="fragment_list"
-        tools:layout="@layout/fragment_list" >
-        <action
-            android:id="@+id/action_listFragment_to_newsFragment"
-            app:destination="@id/newsFragment" />
-        <action
-            android:id="@+id/action_listFragment_to_candleStickChartFragment"
-            app:destination="@id/candleStickChartFragment" />
-        <action
-            android:id="@+id/action_listFragment_to_editFollowingListFragment"
-            app:destination="@id/editFollowingListFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/newsFragment"
-        android:name="com.example.mynewsapp.ui.NewsFragment"
-        android:label="News"
-        tools:layout="@layout/fragment_news">
-        <action
-            android:id="@+id/action_newsFragment_to_newsArticleFragment"
-            app:destination="@id/newsArticleFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/newsArticleFragment"
-        android:name="com.example.mynewsapp.ui.NewsArticleFragment"
-        tools:layout="@layout/fragment_news_article">
-        <argument
-            android:name="article"
-            app:argType="com.example.mynewsapp.model.Article" />
-    </fragment>
-    <fragment
-        android:id="@+id/candleStickChartFragment"
-        android:name="com.example.mynewsapp.ui.CandleStickChartFragment"
-        android:label="fragment_candle_stick_chart">
-        <argument
-            android:name="stockNo"
-            app:argType="string" />
-        <argument
-            android:name="stockName"
-            app:argType="string" />
-        <argument
-            android:name="stockPrice"
-            app:argType="string" />
-        <action
-            android:id="@+id/action_candleStickChartFragment_to_addHistoryFragment"
-            app:destination="@id/addHistoryFragment" />
-        <action
-            android:id="@+id/action_candleStickChartFragment_to_chatFragment"
-            app:destination="@id/chatFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/addHistoryFragment"
-        android:name="com.example.mynewsapp.ui.AddHistoryFragment"
-        android:label="fragment_add_history"
-        tools:layout="@layout/fragment_add_history" >
-        <argument android:name="stockNo"
-            app:argType="string" />
-    </fragment>
+    app:startDestination="@id/stock">
+    <include app:graph="@navigation/stock" />
     <fragment
         android:id="@+id/statisticFragment"
         android:name="com.example.mynewsapp.ui.StatisticFragment"
         android:label="Statistic" />
-    <fragment
-        android:id="@+id/chatFragment"
-        android:name="com.example.mynewsapp.ui.ChatFragment"
-        android:label="fragment_chat"
-        tools:layout="@layout/fragment_chat" />
-    <fragment
-        android:id="@+id/editFollowingListFragment"
-        android:name="com.example.mynewsapp.ui.EditFollowingListFragment"
-        android:label="fragment_edit_following_list"
-        tools:layout="@layout/fragment_edit_following_list" />
+    <include app:graph="@navigation/news" />
 </navigation>

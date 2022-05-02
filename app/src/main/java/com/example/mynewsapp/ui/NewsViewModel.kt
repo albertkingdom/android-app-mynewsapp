@@ -33,7 +33,7 @@ class NewsViewModel(val newsRepository: NewsRepository, application: MyApplicati
     val allStocksFromdb: LiveData<List<Stock>> = newsRepository.allstocks.asLiveData()
     val allFollowingListWithStock: MutableLiveData<List<FollowingListWithStock>> = MutableLiveData()
     val allFollowingList: LiveData<List<FollowingList>> = newsRepository.allFollowingList.asLiveData()
-    val candleStickData: MutableLiveData<Resource<CandleStickData>?> = MutableLiveData()
+    val candleStickData: MutableLiveData<Resource<List<List<String>>>?> = MutableLiveData()
 
     var investHistoryList: LiveData<List<InvestHistory>> = MutableLiveData<List<InvestHistory>>()
     val allInvestHistoryList: LiveData<List<InvestHistory>> = newsRepository.allHistory.asLiveData()
@@ -128,12 +128,6 @@ class NewsViewModel(val newsRepository: NewsRepository, application: MyApplicati
         }
     }
 
-    private fun <T> concatenate(vararg lists: List<T>): List<T> {
-        // [[],[],[],...] + [[],[],[],...]
-        val result: MutableList<T> = ArrayList()
-        lists.forEach { list: List<T> -> result.addAll(list) }
-        return result
-    }
 
     fun getCandleStickData(currentDate: String, stockNo: String) {
         if (isNetworkAvailable()) {
@@ -146,17 +140,22 @@ class NewsViewModel(val newsRepository: NewsRepository, application: MyApplicati
                     newsRepository.getCandleStickData(currentMonthStr, stockNo)
                 val responseLastMonth = newsRepository.getCandleStickData(lastMonthStr, stockNo)
 
+                println("responseCurrentMonth ${responseCurrentMonth.body()}")
 
                 // concat multiple month candle stick data
-                val fullCandleStickDataList = concatenate(
-                    responseLastMonth.body()?.data!!,
-                    responseCurrentMonth.body()?.data!!
-                )
+                val candleStickDataList = mutableListOf<List<String>>()
+
+                candleStickDataList.addAll(responseLastMonth.body()?.data!!)
+
+                if (responseCurrentMonth.body()?.data != null) {
+                    candleStickDataList.addAll(responseCurrentMonth.body()?.data!!)
+                }
+
                if (!responseCurrentMonth.isSuccessful || !responseLastMonth.isSuccessful) {
                    candleStickData.value = Resource.Error("There's error in fetching candle stick data.")
                } else {
                    candleStickData.value =
-                       Resource.Success(CandleStickData(fullCandleStickDataList, "", listOf(), listOf(), "", ""))
+                       Resource.Success(candleStickDataList)
                }
 
             }

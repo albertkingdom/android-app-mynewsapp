@@ -10,12 +10,14 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import com.example.mynewsapp.R
 import com.example.mynewsapp.db.FollowingList
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.dialog.MaterialDialogs
 
 class AddFollowingListDialogFragment: DialogFragment() {
     private val viewModel: NewsViewModel by activityViewModels()
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val builder = AlertDialog.Builder(requireContext(), R.style.AddFollowingListDialogTheme)
+        val builder = MaterialAlertDialogBuilder(requireContext(), R.style.AddFollowingListDialogTheme)
 
         return builder.setView(R.layout.dialog_add_following_list)
             .setTitle("新增追蹤清單")

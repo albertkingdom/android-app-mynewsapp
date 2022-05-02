@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/stock"
+    app:startDestination="@id/stockListFragment">
+
+    <fragment
+        android:id="@+id/stockListFragment"
+        android:name="com.example.mynewsapp.ui.ListFragment"
+        android:label="自選股"
+        tools:layout="@layout/fragment_list">
+        <action
+            android:id="@+id/action_listFragment_to_candleStickChartFragment"
+            app:destination="@id/candleStickChartFragment" />
+        <action
+            android:id="@+id/action_listFragment_to_addFollowingListDialogFragment"
+            app:destination="@id/addFollowingListDialogFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/candleStickChartFragment"
+        android:name="com.example.mynewsapp.ui.CandleStickChartFragment"
+        android:label="" >
+        <action
+            android:id="@+id/action_candleStickChartFragment_to_addHistoryFragment"
+            app:destination="@id/addHistoryFragment" />
+        <action
+            android:id="@+id/action_candleStickChartFragment_to_chatFragment"
+            app:destination="@id/chatFragment" />
+        <argument android:name="stockNo" />
+        <argument android:name="stockName" />
+        <argument android:name="stockPrice" />
+    </fragment>
+    <dialog
+        android:id="@+id/addFollowingListDialogFragment"
+        android:name="com.example.mynewsapp.ui.AddFollowingListDialogFragment"
+        android:label="AddFollowingListDialogFragment" />
+    <fragment
+        android:id="@+id/addHistoryFragment"
+        android:name="com.example.mynewsapp.ui.AddHistoryFragment"
+        android:label="fragment_add_history"
+        tools:layout="@layout/fragment_add_history" >
+        <argument android:name="stockNo" />
+    </fragment>
+    <fragment
+        android:id="@+id/chatFragment"
+        android:name="com.example.mynewsapp.ui.ChatFragment"
+        android:label="fragment_chat"
+        tools:layout="@layout/fragment_chat" />
+</navigation>

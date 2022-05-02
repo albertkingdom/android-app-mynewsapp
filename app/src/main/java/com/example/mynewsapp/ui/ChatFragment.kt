@@ -50,11 +50,12 @@ class ChatFragment : Fragment() {
         //change toolbar title
         (requireActivity() as AppCompatActivity).supportActionBar?.title = "${chatViewModel.stockNo} chat room"
 
+        adapter = MessageListAdapter()
+        recyclerView.adapter = adapter
+
         chatViewModel.currentLoginUser.observe(viewLifecycleOwner, { firebaseUser ->
             val user = User(firebaseUser.uid, null)
-            adapter = MessageListAdapter()
             adapter.currentUser = user
-            recyclerView.adapter = adapter
 
         })
 
