@@ -56,6 +56,5 @@
         <item name="boxStrokeWidth">2dp</item>
         <item name="hintTextColor">@color/black</item>
 
-
     </style>
 </resources>

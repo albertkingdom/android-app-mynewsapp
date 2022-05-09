@@ -10,13 +10,14 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:paddingHorizontal="10dp"
+        android:paddingHorizontal="0dp"
         android:paddingVertical="10dp"
-        tools:context=".ui.CandleStickChartFragment">
+        tools:context=".ui.detail.CandleStickChartFragment">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:paddingHorizontal="10dp"
             android:layout_marginBottom="30dp">
 
             <TextView
@@ -61,6 +62,7 @@
             android:id="@+id/chart_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:paddingHorizontal="10dp"
             android:orientation="vertical">
 
             <TextView
@@ -122,48 +124,36 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginVertical="10dp"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:background="@color/black"
+            >
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="買/賣"
-                android:textAlignment="center" />
+                style="@style/candle_stick_chart_label"
+                android:text="買/賣" />
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="日期"
-                android:textAlignment="center" />
+                style="@style/candle_stick_chart_label"
+                android:text="日期" />
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="價位"
-                android:textAlignment="center" />
+                style="@style/candle_stick_chart_label"
+                android:text="價位" />
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="股數"
-                android:textAlignment="center" />
+                style="@style/candle_stick_chart_label"
+                android:text="股數" />
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="損益"
-                android:textAlignment="center" />
+                style="@style/candle_stick_chart_label"
+                android:text="損益" />
         </androidx.appcompat.widget.LinearLayoutCompat>
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/invest_history"
+            android:id="@+id/invest_history_recycler_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:paddingHorizontal="10dp"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
     </androidx.appcompat.widget.LinearLayoutCompat>

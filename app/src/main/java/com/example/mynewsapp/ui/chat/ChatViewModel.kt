@@ -1,10 +1,10 @@
-package com.example.mynewsapp.ui
+package com.example.mynewsapp.ui.chat
 
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.liveData
 import com.example.mynewsapp.model.Message
 import com.example.mynewsapp.model.User
 import com.google.firebase.Timestamp
@@ -21,17 +21,21 @@ import java.util.*
 import kotlin.collections.HashMap
 
 class ChatViewModel: ViewModel() {
-    var stockNo: String = ""
+
     val db = Firebase.firestore
     val auth: FirebaseAuth = Firebase.auth
     var currentLoginUser: MutableLiveData<FirebaseUser> = MutableLiveData()
 
     private var channelID: String? = null
-    var messageListLiveDate: MutableLiveData<MutableList<Message>> = MutableLiveData()
+
+    var messageListLiveData: MutableLiveData<MutableList<Message>> = MutableLiveData()
+
+
 
     companion object {
         val TAG = "ChatViewModel"
     }
+
 
     fun checkIsExistingChannel(channelName: String) {
         var channelReference: CollectionReference = db.collection("channels")
@@ -52,6 +56,7 @@ class ChatViewModel: ViewModel() {
                     isExisting = true
                     channelID = snapshot.documents[0].id
                     Log.d(TAG, "checkIsExistingChannel channel id...$channelID")
+                    getMessages()
                     return@addOnSuccessListener
                 } else {
                     createChannel(channelName)
@@ -62,7 +67,7 @@ class ChatViewModel: ViewModel() {
             }
     }
     private fun createChannel(channelName: String) {
-
+        println("createChannel")
         var channelReference: CollectionReference =
             db.collection("channels")
 
@@ -73,6 +78,7 @@ class ChatViewModel: ViewModel() {
             .addOnSuccessListener { documentRef ->
                 Log.d(TAG, "${documentRef.id}")
                 channelID = documentRef.id
+                getMessages()
             }
             .addOnFailureListener { e ->
                 Log.w(TAG, "create channel error:", e)
@@ -80,7 +86,8 @@ class ChatViewModel: ViewModel() {
 
 
     }
-    fun getMessages(): List<Message> {
+    private fun getMessages() {
+        println("getMessages")
         val reference = db.collection("channels/$channelID/thread")
         val messageList = mutableListOf<Message>()
         Log.d(TAG, "channel id...$channelID")
@@ -98,13 +105,14 @@ class ChatViewModel: ViewModel() {
             messageList.sortBy { message ->  message.createdAt}
             Log.d(TAG, "messageList... $messageList")
 
-            messageListLiveDate.value = messageList
+            messageListLiveData.value = messageList
 
-            Log.d(TAG, "messageList... ${messageListLiveDate.value}")
+
 
         }
-        return messageList
+
     }
+
     private fun handleDocumentChange(change: DocumentChange): Message {
         lateinit var message: Message
         when(change.type) {
@@ -121,7 +129,7 @@ class ChatViewModel: ViewModel() {
         }
         return message
     }
-    fun signIn() {
+    private fun signIn() {
         auth.signInAnonymously().addOnCompleteListener() { authResult ->
             if (authResult.isSuccessful) {
                 currentLoginUser.value = auth.currentUser
@@ -145,10 +153,10 @@ class ChatViewModel: ViewModel() {
         val reference = db.collection("channels/$channelID/thread")
         reference.add(message)
             .addOnSuccessListener { documentRef ->
-            Log.d(TAG,"successfully add new document: ${documentRef.id}")
-        }
+                Log.d(TAG, "successfully add new document: ${documentRef.id}")
+            }
             .addOnFailureListener { e ->
-            Log.w(TAG, "Error adding document", e)
-        }
+                Log.w(TAG, "Error adding document", e)
+            }
     }
 }

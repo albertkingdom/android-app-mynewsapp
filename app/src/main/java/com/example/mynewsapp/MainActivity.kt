@@ -1,19 +1,12 @@
 package com.example.mynewsapp
 
 import android.os.Bundle
-import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.Toolbar
-import androidx.activity.viewModels
-import androidx.annotation.MenuRes
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.ListPopupWindow
-import androidx.appcompat.widget.PopupMenu
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
@@ -21,21 +14,21 @@ import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.*
 import com.example.mynewsapp.databinding.ActivityMainBinding
-import com.example.mynewsapp.db.FollowingList
-import com.example.mynewsapp.ui.ChatViewModel
-import com.example.mynewsapp.ui.ListFragmentDirections
-import com.example.mynewsapp.ui.NewsViewModel
-import com.example.mynewsapp.ui.NewsViewModelFactory
+import com.example.mynewsapp.ui.*
+import com.example.mynewsapp.ui.list.ListFragmentDirections
+import com.example.mynewsapp.ui.list.ListViewModel
+import com.example.mynewsapp.ui.list.ListViewModelFactory
 import com.google.android.material.navigation.NavigationBarView
 
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    lateinit var viewModel: NewsViewModel
-    val chatViewModel: ChatViewModel by viewModels()
+
+    lateinit var listViewModel: ListViewModel
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var navController: NavController
+    lateinit var navView: BottomNavigationView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,15 +37,13 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         setSupportActionBar(findViewById(R.id.my_toolbar))
 
-        val navView: BottomNavigationView = binding.navView
+        navView = binding.navView
 
-       // Initialize view model ==============
-        val viewModelFactory = NewsViewModelFactory((application as MyApplication).repository,
-            application as MyApplication
-        )
-        viewModel = ViewModelProvider(this, viewModelFactory)
-            .get(NewsViewModel::class.java)
-        //================
+
+        val listViewModelFactory = ListViewModelFactory((application as MyApplication).repository, application as MyApplication)
+        listViewModel = ViewModelProvider(this, listViewModelFactory)
+            .get(ListViewModel::class.java)
+
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.StockNavHostFragment) as NavHostFragment
         navController = navHostFragment.navController
@@ -62,6 +53,17 @@ class MainActivity : AppCompatActivity() {
         appBarConfiguration = AppBarConfiguration(setOf(R.id.stockListFragment, R.id.news, R.id.statisticFragment))
         setupActionBarWithNavController(navController, appBarConfiguration)
 
+        setupOnClickBottomNav()
+
+        setupAppBarMenu()
+
+    }
+    override fun onSupportNavigateUp(): Boolean {
+
+        return navController.navigateUp(appBarConfiguration)
+    }
+
+    private fun setupOnClickBottomNav() {
         // determine whether to reload tabs based on current selected bottom nav menu items
         navView.setOnItemSelectedListener(object : NavigationBarView.OnItemSelectedListener {
             override fun onNavigationItemSelected(item: MenuItem): Boolean {
@@ -76,62 +78,58 @@ class MainActivity : AppCompatActivity() {
 
         })
 
-
-    }
-    override fun onSupportNavigateUp(): Boolean {
-
-        return navController.navigateUp(appBarConfiguration)
+        showMenuSelectorBtn()
     }
 
 
-    fun showMenuSelectorBtn(menuItems: List<FollowingList>) {
+    fun showMenuSelectorBtn() {
         binding.showListMenuButton.visibility = View.VISIBLE
-        setupMenuSelectorBtn(menuItems)
+        setupAppBarMenu()
     }
     fun hideMenuSelectorBtn() {
         binding.showListMenuButton.visibility = View.INVISIBLE
     }
-    private fun setupMenuSelectorBtn(menuItems: List<FollowingList>) {
+    private fun setupAppBarMenu() {
         val menuSelectorButton = binding.showListMenuButton
         val listPopupWindow = ListPopupWindow(this, null, R.attr.listPopupWindowStyle)
-
 
         // Set button as the list popup's anchor
         listPopupWindow.anchorView = menuSelectorButton
 
 
-        // Set list popup's content
-        val listNameArray = menuItems.map { list -> list.listName }
-        val listNameArrayAndEdit = mutableListOf<String>()
-        listNameArrayAndEdit.addAll(listNameArray)
-        listNameArrayAndEdit.add("Edit...")
-        val adapter = ArrayAdapter(this, R.layout.menu_list_selector_item, listNameArrayAndEdit)
-        listPopupWindow.setAdapter(adapter)
-        // Set list popup's item click listener
-        listPopupWindow.setOnItemClickListener { parent: AdapterView<*>?, view: View?, position: Int, id: Long ->
-            // Respond to list popup window item click.
-            if (position == listNameArrayAndEdit.lastIndex) {
-                // go to edit following list page
-                println("click editing btn of following list")
-                findNavController(R.id.StockNavHostFragment).navigate(ListFragmentDirections.actionListFragmentToAddFollowingListDialogFragment())
-                // Dismiss popup.
-                listPopupWindow.dismiss()
-                return@setOnItemClickListener
+
+        listViewModel.appBarMenuItemNameList.observe(this) { list ->
+
+            // setup adapter
+            val adapter = ArrayAdapter(this, R.layout.menu_list_selector_item, list)
+            listPopupWindow.setAdapter(adapter)
+            // setup click listener for app bar menu item
+            listPopupWindow.setOnItemClickListener { adapterView, view, position, id ->
+
+                // when click edit button
+                if (position == list.lastIndex) {
+                    println("click editing btn of following list")
+                    findNavController(R.id.StockNavHostFragment).navigate(ListFragmentDirections.actionStockListFragmentToEditFollowingListFragment())
+                    // Dismiss popup.
+                    listPopupWindow.dismiss()
+
+                } else {
+                    listViewModel.changeCurrentFollowingList(position)
+                    listPopupWindow.dismiss()
+
+                }
+
             }
-            println("click on list menu $position name = ${listNameArray[position]}")
-            viewModel.currentSelectedFollowingListId.postValue(menuItems[position].followingListId)
-            //menuSelectorButton.text = menuItems[position].listName
-            // Dismiss popup.
-            listPopupWindow.dismiss()
         }
+
 
         // Show list popup window on button click.
         menuSelectorButton.setOnClickListener { v: View? -> listPopupWindow.show() }
 
-        viewModel.currentSelectedFollowingListId.observe(this, { listId ->
-            menuSelectorButton.text =
-                menuItems.find { list -> list.followingListId.equals(listId) }?.listName
-        })
+        // title of app bar menu
+        listViewModel.appBarMenuButtonTitle.observe(this) { title ->
+            menuSelectorButton.text = title
+        }
     }
 
 

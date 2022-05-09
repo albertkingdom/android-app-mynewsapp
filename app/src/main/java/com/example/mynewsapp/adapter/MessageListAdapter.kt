@@ -19,6 +19,7 @@ class MessageListAdapter(): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     var messageList = listOf<Message>()
     var currentUser: User? = null
+
     class ReceivedMessageHolder(view: View): RecyclerView.ViewHolder(view) {
         val messageText: TextView = view.findViewById(R.id.text_gchat_message_other)
         val dateText: TextView = view.findViewById(R.id.text_gchat_date_other)
@@ -95,5 +96,9 @@ class MessageListAdapter(): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         return messageList.size
     }
 
+    fun updateMessageList(list: List<Message>) {
+        messageList = list
+        notifyDataSetChanged()
+    }
 
 }

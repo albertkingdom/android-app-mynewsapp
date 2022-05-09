@@ -6,7 +6,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 
-object RetrofitInstanceForCandleStickData {
+object RetrofitInstanceForGeneralUse {
     private val logging = HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
     private val client = OkHttpClient.Builder().addInterceptor(logging).build()
     val retrofit = Retrofit.Builder()
@@ -15,7 +15,13 @@ object RetrofitInstanceForCandleStickData {
         .client(client)
         .build()
 
-    val retrofitService:CandleStickDataApi by lazy {
+    val retrofitServiceForCandleStickData:CandleStickDataApi by lazy {
         retrofit.create(CandleStickDataApi::class.java)
+    }
+    val retrofitServiceForStockInfo:StockInfoApi by lazy {
+        retrofit.create(StockInfoApi::class.java)
+    }
+    val retrofitServiceForNews:NewsAPI by lazy {
+        retrofit.create(NewsAPI::class.java)
     }
 }

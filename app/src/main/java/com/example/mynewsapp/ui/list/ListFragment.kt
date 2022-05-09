@@ -1,4 +1,4 @@
-package com.example.mynewsapp.ui
+package com.example.mynewsapp.ui.list
 
 import android.appwidget.AppWidgetManager
 import android.content.Context
@@ -24,7 +24,6 @@ import com.example.mynewsapp.StockAppWidgetProvider
 import com.example.mynewsapp.R
 import com.example.mynewsapp.adapter.StockInfoAdapter
 import com.example.mynewsapp.databinding.FragmentListBinding
-import com.example.mynewsapp.db.FollowingList
 import com.example.mynewsapp.model.MsgArray
 import com.example.mynewsapp.model.WidgetStockData
 import com.example.mynewsapp.util.Resource
@@ -36,7 +35,8 @@ import com.squareup.moshi.Types
 
 class ListFragment : Fragment() {
     private lateinit var binding: FragmentListBinding
-    private val viewModel: NewsViewModel by activityViewModels()
+    //private val viewModel: NewsViewModel by activityViewModels()
+    private val listViewModel: ListViewModel by activityViewModels()
 
     private lateinit var stockAdapter: StockInfoAdapter
     private lateinit var swipeBackground: ColorDrawable
@@ -50,6 +50,7 @@ class ListFragment : Fragment() {
     ): View? {
         binding = FragmentListBinding.inflate(inflater, container, false)
         setHasOptionsMenu(true)
+        (activity as MainActivity).showMenuSelectorBtn()
 
         return binding.root
     }
@@ -62,18 +63,19 @@ class ListFragment : Fragment() {
 //        (requireActivity() as AppCompatActivity).supportActionBar?.title = "自選股"
 
 
-        stockAdapter = StockInfoAdapter(getStockNameToGetRelatedNews, toCandelStickChartFragment)
+        stockAdapter = StockInfoAdapter(getStockNameToGetRelatedNews, navigateToCandelStickChartFragment)
         recyclerView.adapter = stockAdapter
 
-        viewModel.stockPriceInfo.observe(viewLifecycleOwner, Observer { response ->
-
+        listViewModel.stockPriceInfo.observe(viewLifecycleOwner, Observer { response ->
+            println("Observe TestStockPrice $response")
 
             when (response) {
                 is Resource.Success -> {
                     response.data?.let { stockInfoResponse ->
-                        //stockAdapter.submitList(stockInfoResponse.msgArray)
                         val listOfMsgArray = stockInfoResponse.msgArray
-                        stockAdapter.setData(stockInfoResponse.msgArray.toMutableList())
+                        stockAdapter.submitList(stockInfoResponse.msgArray)
+
+//                        stockAdapter.setData(stockInfoResponse.msgArray.toMutableList())
 
                         val listOfWidgetStockData = listOfMsgArray.map { msgArray ->
                             WidgetStockData(stockNo = msgArray.stockNo, stockPrice = msgArray.currentPrice, stockName = msgArray.stockName, yesterDayPrice = msgArray.lastDayPrice)
@@ -101,29 +103,24 @@ class ListFragment : Fragment() {
         })
 
         // get following lists and stocks
-        viewModel.allFollowingList.observe(viewLifecycleOwner, { lists ->
-            println("allFollowingListWithStock $lists")
-            if (lists.isEmpty()) {
-                val followingList = FollowingList(followingListId = 0,listName = "Default")
-                viewModel.createFollowingList(followingList)
-            }
-            if (lists.isNotEmpty()) {
-                viewModel.currentSelectedFollowingListId.postValue(lists.first().followingListId)
-            }
-            (activity as MainActivity).showMenuSelectorBtn(lists)
-
-
-        })
+//        viewModel.allFollowingList.observe(viewLifecycleOwner) { lists ->
+//            println("allFollowingListWithStock $lists")
+//            if (lists.isEmpty()) {
+//                val followingList = FollowingList(followingListId = 0, listName = "Default")
+//                viewModel.createFollowingList(followingList)
+//            }
+//            if (lists.isNotEmpty()) {
+//                viewModel.currentSelectedFollowingListId.postValue(lists.first().followingListId)
+//            }
+//            (activity as MainActivity).showMenuSelectorBtn(lists)
+//
+//
+//        }
         // observe selected list id and get
-        viewModel.currentSelectedFollowingListId.observe(viewLifecycleOwner, { listId ->
+        listViewModel.currentSelectedFollowingListId.observe(viewLifecycleOwner) { listId ->
             println("currentSelectedFollowingListId  $listId")
-            viewModel.getOneFollowingListWithStocks(listId)
-        })
-
-        binding.floatingBtn.setOnClickListener {
-            val dialog = AddStockDialogFragment()
-
-            dialog.show(parentFragmentManager,"stock")
+            //viewModel.getOneFollowingListWithStocks(listId)
+//            viewModel.fetchSingleList()
         }
 
 
@@ -144,11 +141,12 @@ class ListFragment : Fragment() {
                 val currentStockItem = stockAdapter.currentList[viewHolder.adapterPosition]
 
                 //viewModel.deleteStock(currentStockItem.c)
-                viewModel.deleteStockByStockNoAndListId(currentStockItem.stockNo)
-                viewModel.deleteAllHistory(currentStockItem.stockNo)
+                listViewModel.deleteStockByStockNoAndListId(currentStockItem.stockNo)
+                listViewModel.deleteAllHistory(currentStockItem.stockNo)
                 Snackbar.make(view, "追蹤股票代號已刪除",Snackbar.LENGTH_LONG).show()
 
-                viewModel.getOneFollowingListWithStocks()
+                //viewModel.getOneFollowingListWithStocks()
+
                 stockAdapter.notifyItemChanged(viewHolder.layoutPosition)
 //                stockAdapter.notifyDataSetChanged()
             }
@@ -205,16 +203,29 @@ class ListFragment : Fragment() {
 
         }).attachToRecyclerView(recyclerView)
 
-        binding.swipeRefresh.setOnRefreshListener {
+        setupOnClickFab()
 
-            viewModel.cancelRepeatFetchPriceJob()
-            viewModel.getStockNoListAndToQueryStockPriceInfo()
-        }
+        setupSwipeRefresh()
 
 
     }
 
+    private fun setupSwipeRefresh() {
+        binding.swipeRefresh.setOnRefreshListener {
+            //viewModel.cancelRepeatFetchPriceJob()
+            //viewModel.getStockNoListAndToQueryStockPriceInfo()
+            listViewModel.changeCurrentFollowingListId()
+        }
+    }
 
+    private fun setupOnClickFab() {
+        binding.floatingBtn.setOnClickListener {
+            val dialog = AddStockDialogFragment()
+
+            dialog.show(parentFragmentManager,"stock")
+        }
+
+    }
     private val getStockNameToGetRelatedNews:(stockContent: MsgArray)->Unit = { stockContent->
 
 //        val stockName = stockContent.stockName
@@ -222,7 +233,7 @@ class ListFragment : Fragment() {
 //        findNavController().navigate(ListFragmentDirections.actionListFragmentToNewsFragment())
     }
 
-    private val toCandelStickChartFragment:(stockContent: MsgArray) -> Unit = {
+    private val navigateToCandelStickChartFragment:(stockContent: MsgArray) -> Unit = {
 
         val stockNo = it.stockNo
         val stockPrice:String = if(it.currentPrice != "-") it.currentPrice else it.lastDayPrice
@@ -278,7 +289,7 @@ class ListFragment : Fragment() {
     override fun onStop() {
         super.onStop()
         Log.d(TAG, "onstop")
-        viewModel.cancelRepeatFetchPriceJob()
+        listViewModel.cancelRepeatFetchPriceJob()
         (activity as MainActivity).hideMenuSelectorBtn()
     }
 }

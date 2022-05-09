@@ -1,32 +1,27 @@
-package com.example.mynewsapp.ui
+package com.example.mynewsapp.ui.news
 
-import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
-import androidx.lifecycle.coroutineScope
-import androidx.navigation.fragment.findNavController
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
-import com.example.mynewsapp.MainActivity
+import com.example.mynewsapp.MyApplication
 import com.example.mynewsapp.R
 import com.example.mynewsapp.adapter.NewsAdapter
 import com.example.mynewsapp.databinding.FragmentNewsBinding
 import com.example.mynewsapp.util.Resource
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+
 
 class NewsFragment : Fragment(R.layout.fragment_news) {
 
-    private val viewModel: NewsViewModel by activityViewModels()
+    private lateinit var newsViewModel: NewsViewModel
 
     private lateinit var binding: FragmentNewsBinding
     private lateinit var newsAdapter: NewsAdapter
@@ -36,7 +31,12 @@ class NewsFragment : Fragment(R.layout.fragment_news) {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        viewModel.getHeadlines()
+        val repository = (activity?.application as MyApplication).repository
+
+        val newsViewModelFactory = NewsViewModelFactory(repository, (activity?.application as MyApplication))
+        newsViewModel = ViewModelProvider(this, newsViewModelFactory).get(NewsViewModel::class.java)
+
+        //newsViewModel.getHeadlines()
         return super.onCreateView(inflater, container, savedInstanceState)
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -59,9 +59,8 @@ class NewsFragment : Fragment(R.layout.fragment_news) {
         }
         recyclerView.adapter = newsAdapter
 
-        //viewModel = (activity as MainActivity).viewModel
 
-        viewModel.news.observe(viewLifecycleOwner, Observer { response ->
+        newsViewModel.news.observe(viewLifecycleOwner, Observer { response ->
             when (response) {
                 is Resource.Success -> {
                     response.data?.let { newsResponse ->
@@ -83,7 +82,7 @@ class NewsFragment : Fragment(R.layout.fragment_news) {
 
         binding.swipeRefresh.setOnRefreshListener {
             //Log.d("list fragment", "pull to refresh")
-            viewModel.getHeadlines()
+            newsViewModel.getHeadlines()
 
         }
     }

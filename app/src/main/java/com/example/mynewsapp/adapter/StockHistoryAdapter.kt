@@ -67,7 +67,7 @@ class StockHistoryAdapter: ListAdapter<InvestHistory, StockHistoryAdapter.StockH
                     Instant.ofEpochMilli(currentHistory.date),TimeZone.getDefault().toZoneId())
                 val year = (localDateTime.year - 1911).toString()
                 val month = if(localDateTime.monthValue<10) "0${localDateTime.monthValue}" else localDateTime.monthValue
-                val day = localDateTime.dayOfMonth
+                val day = if(localDateTime.dayOfMonth<10) "0${localDateTime.dayOfMonth}" else localDateTime.dayOfMonth
 
 
                 if (clickItemListener != null) {

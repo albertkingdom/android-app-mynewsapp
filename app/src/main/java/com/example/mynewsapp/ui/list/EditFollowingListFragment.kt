@@ -1,4 +1,4 @@
-package com.example.mynewsapp.ui
+package com.example.mynewsapp.ui.list
 
 
 import android.graphics.Canvas
@@ -14,10 +14,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.mynewsapp.R
 import com.example.mynewsapp.adapter.FollowingListAdapter
 import com.example.mynewsapp.databinding.FragmentEditFollowingListBinding
+import com.example.mynewsapp.ui.list.AddFollowingListDialogFragment
+import com.example.mynewsapp.ui.list.ListViewModel
 import com.google.android.material.snackbar.Snackbar
 
 class EditFollowingListFragment: Fragment(R.layout.fragment_edit_following_list) {
-    private val viewModel: NewsViewModel by activityViewModels()
+
+    private val listViewModel: ListViewModel by activityViewModels()
     lateinit var binding: FragmentEditFollowingListBinding
     val adapter: FollowingListAdapter = FollowingListAdapter()
 
@@ -27,21 +30,11 @@ class EditFollowingListFragment: Fragment(R.layout.fragment_edit_following_list)
         (requireActivity() as AppCompatActivity).supportActionBar?.title = "Edit Following List"
 
         binding = FragmentEditFollowingListBinding.bind(view)
-        binding.followingListRecyclerview.adapter = adapter
-        viewModel.allFollowingList.observe(viewLifecycleOwner, { list ->
-            println("allFollowingList..$list")
-            adapter.submitList(list)
-        })
 
-        binding.btnAddNewFollowingList.setOnClickListener { view ->
-            // open dialog
-            val dialog = AddFollowingListDialogFragment()
-            dialog.show(parentFragmentManager,"a")
+        setupListAdapter()
 
+        setupOnClickAddListButton()
 
-        }
-
-        // TODO: swipe to delete following list
         swipeToDelete()
     }
     private fun swipeToDelete() {
@@ -60,11 +53,24 @@ class EditFollowingListFragment: Fragment(R.layout.fragment_edit_following_list)
 
                 val currentFollowingListItem = adapter.currentList[viewHolder.adapterPosition]
 
-                viewModel.deleteFollowingList(currentFollowingListItem.followingListId)
+                listViewModel.deleteFollowingList(currentFollowingListItem.followingListId)
 
-                Snackbar.make(binding.root, "追蹤清單${currentFollowingListItem.listName}已刪除", Snackbar.LENGTH_LONG).show()
+                Snackbar.make(
+                    binding.root,
+                    "追蹤清單${currentFollowingListItem.listName}已刪除",
+                    Snackbar.LENGTH_LONG
+                ).show()
+
             }
 
+            override fun getSwipeDirs(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder
+            ): Int {
+                // the 1st item can not be deleted
+                if (viewHolder.layoutPosition == 0) return 0
+                return super.getSwipeDirs(recyclerView, viewHolder)
+            }
 
             override fun onChildDraw(
                 c: Canvas,
@@ -116,5 +122,21 @@ class EditFollowingListFragment: Fragment(R.layout.fragment_edit_following_list)
             }
 
         }).attachToRecyclerView(binding.followingListRecyclerview)
+    }
+
+    private fun setupListAdapter() {
+        binding.followingListRecyclerview.adapter = adapter
+        listViewModel.allFollowingList.observe(viewLifecycleOwner) { list ->
+            println("allFollowingList..$list")
+            adapter.submitList(list)
+        }
+    }
+    private fun setupOnClickAddListButton() {
+        binding.btnAddNewFollowingList.setOnClickListener { view ->
+            // open dialog
+            val dialog = AddFollowingListDialogFragment()
+            dialog.show(parentFragmentManager,"a")
+
+        }
     }
 }

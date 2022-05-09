@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:paddingHorizontal="20dp"
-    tools:context=".ui.AddHistoryFragment">
+    tools:context=".ui.detail.AddHistoryFragment">
 
     <TableLayout
         android:layout_width="match_parent"

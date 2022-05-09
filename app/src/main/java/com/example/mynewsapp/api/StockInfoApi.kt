@@ -8,11 +8,14 @@ import retrofit2.http.*
 interface StockInfoApi {
 
 
-    @GET("api/getStockInfo.jsp")
+//    @GET("api/getStockInfo.jsp")
+    @GET
     suspend fun getStockPriceInfo(
-        @Query("ex_ch")
-        stockNo: String ="tse_2330.tw",
-        @Query("json")
-        isJson: String = "1"
+        @Url
+        urlString: String,
+//        @Query("ex_ch")
+//        stockNo: String ="tse_2330.tw",
+//        @Query("json")
+//        isJson: String = "1"
     ): Response<StockPriceInfoResponse>
 }

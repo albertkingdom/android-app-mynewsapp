@@ -3,12 +3,15 @@ package com.example.mynewsapp.repository
 import com.example.mynewsapp.model.NewsResponse
 import com.example.mynewsapp.model.StockPriceInfoResponse
 import com.example.mynewsapp.api.RetrofitInstance
-import com.example.mynewsapp.api.RetrofitInstanceForCandleStickData
-import com.example.mynewsapp.api.RetrofitInstanceForStockPrice
+import com.example.mynewsapp.api.RetrofitInstanceForGeneralUse
 import com.example.mynewsapp.db.*
 
 
 import com.example.mynewsapp.model.CandleStickData
+import com.example.mynewsapp.util.Constant.Companion.API_KEY
+import com.example.mynewsapp.util.Constant.Companion.BASE_URL_CANDLE_STICK_DATA
+import com.example.mynewsapp.util.Constant.Companion.BASE_URL_NEWS
+import com.example.mynewsapp.util.Constant.Companion.BASE_URL_STOCK_PRICE
 import kotlinx.coroutines.flow.Flow
 import retrofit2.Response
 
@@ -17,12 +20,14 @@ class NewsRepository(val stockDao: StockDao) {
         return RetrofitInstance.retrofitService.searchForNews(stockName, page)
     }
 
-    suspend fun getHeadlines(country:String, page: Int, category: String):Response<NewsResponse>{
-        return RetrofitInstance.retrofitService.getHeadlines(country, category,page)
+    suspend fun getHeadlines(country:String = "tw", page: Int = 1, category: String ="business"):Response<NewsResponse>{
+//        return RetrofitInstance.retrofitService.getHeadlines(country, category,page)
+        return RetrofitInstanceForGeneralUse.retrofitServiceForNews.getHeadlines("${BASE_URL_NEWS}v2/top-headlines?country=$country&page=$page&category=$category&apiKey=$API_KEY")
     }
 
     suspend fun getStockPriceInfo(stockNo:String):Response<StockPriceInfoResponse>{
-        return RetrofitInstanceForStockPrice.retrofitService.getStockPriceInfo(stockNo)
+//        return RetrofitInstanceForStockPrice.retrofitService.getStockPriceInfo(stockNo)
+        return RetrofitInstanceForGeneralUse.retrofitServiceForStockInfo.getStockPriceInfo("${BASE_URL_STOCK_PRICE}api/getStockInfo.jsp?ex_ch=$stockNo&json=1")
     }
 
     val allstocks: Flow<List<Stock>> =stockDao.getAllStocks()
@@ -56,7 +61,9 @@ class NewsRepository(val stockDao: StockDao) {
         stockDao.deleteStockByStockNoAndListId(stockNo, followingListId)
     }
     suspend fun getCandleStickData(currentDate:String, stockNo: String):Response<CandleStickData>{
-        return  RetrofitInstanceForCandleStickData.retrofitService.getCandleStickData(currentDate, stockNo)
+//        return  RetrofitInstanceForCandleStickData.retrofitService.getCandleStickData(currentDate, stockNo)
+
+        return  RetrofitInstanceForGeneralUse.retrofitServiceForCandleStickData.getCandleStickData("${BASE_URL_CANDLE_STICK_DATA}STOCK_DAY?response=json&date=$currentDate&stockNo=$stockNo")
     }
 
     val allHistory: Flow<List<InvestHistory>> = stockDao.getAllHistory()

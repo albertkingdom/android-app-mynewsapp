@@ -7,19 +7,19 @@
 
     <fragment
         android:id="@+id/stockListFragment"
-        android:name="com.example.mynewsapp.ui.ListFragment"
+        android:name="com.example.mynewsapp.ui.list.ListFragment"
         android:label="自選股"
         tools:layout="@layout/fragment_list">
         <action
             android:id="@+id/action_listFragment_to_candleStickChartFragment"
             app:destination="@id/candleStickChartFragment" />
         <action
-            android:id="@+id/action_listFragment_to_addFollowingListDialogFragment"
-            app:destination="@id/addFollowingListDialogFragment" />
+            android:id="@+id/action_stockListFragment_to_editFollowingListFragment"
+            app:destination="@id/editFollowingListFragment" />
     </fragment>
     <fragment
         android:id="@+id/candleStickChartFragment"
-        android:name="com.example.mynewsapp.ui.CandleStickChartFragment"
+        android:name="com.example.mynewsapp.ui.detail.CandleStickChartFragment"
         android:label="" >
         <action
             android:id="@+id/action_candleStickChartFragment_to_addHistoryFragment"
@@ -33,18 +33,31 @@
     </fragment>
     <dialog
         android:id="@+id/addFollowingListDialogFragment"
-        android:name="com.example.mynewsapp.ui.AddFollowingListDialogFragment"
+        android:name="com.example.mynewsapp.ui.list.AddFollowingListDialogFragment"
         android:label="AddFollowingListDialogFragment" />
     <fragment
         android:id="@+id/addHistoryFragment"
-        android:name="com.example.mynewsapp.ui.AddHistoryFragment"
+        android:name="com.example.mynewsapp.ui.detail.AddHistoryFragment"
         android:label="fragment_add_history"
         tools:layout="@layout/fragment_add_history" >
         <argument android:name="stockNo" />
     </fragment>
     <fragment
         android:id="@+id/chatFragment"
-        android:name="com.example.mynewsapp.ui.ChatFragment"
+        android:name="com.example.mynewsapp.ui.chat.ChatFragment"
         android:label="fragment_chat"
-        tools:layout="@layout/fragment_chat" />
+        tools:layout="@layout/fragment_chat" >
+        <argument
+            android:name="stockNo"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/editFollowingListFragment"
+        android:name="com.example.mynewsapp.ui.list.EditFollowingListFragment"
+        android:label="fragment_edit_following_list"
+        tools:layout="@layout/fragment_edit_following_list" >
+        <action
+            android:id="@+id/action_editFollowingListFragment_to_addFollowingListDialogFragment"
+            app:destination="@id/addFollowingListDialogFragment" />
+    </fragment>
 </navigation>

@@ -1,4 +1,4 @@
-package com.example.mynewsapp.ui
+package com.example.mynewsapp.ui.chat
 
 import android.os.Bundle
 import android.util.Log
@@ -9,21 +9,21 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mynewsapp.R
 import com.example.mynewsapp.adapter.MessageListAdapter
 import com.example.mynewsapp.model.Message
 import com.example.mynewsapp.model.User
-import java.time.LocalDateTime
 import java.util.*
 import kotlin.collections.HashMap
 
 
 class ChatFragment : Fragment() {
+    private val args: ChatFragmentArgs by navArgs()
 
-    private val chatViewModel: ChatViewModel by activityViewModels()
+    private val chatViewModel: ChatViewModel by viewModels()
     lateinit var adapter: MessageListAdapter
     lateinit var recyclerView: RecyclerView
     lateinit var sendMsgButton: Button
@@ -35,8 +35,9 @@ class ChatFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        chatViewModel.getMessages()
+
+        chatViewModel.checkIsExistingChannel(args.stockNo)
+
         chatViewModel.checkIsSignIn()
 
         return inflater.inflate(R.layout.fragment_chat, container, false)
@@ -48,24 +49,25 @@ class ChatFragment : Fragment() {
         sendMsgButton = view.findViewById(R.id.button_gchat_send)
         msgInput = view.findViewById(R.id.edit_gchat_message)
         //change toolbar title
-        (requireActivity() as AppCompatActivity).supportActionBar?.title = "${chatViewModel.stockNo} chat room"
+        (requireActivity() as AppCompatActivity).supportActionBar?.title = "${args.stockNo} chat room"
 
         adapter = MessageListAdapter()
         recyclerView.adapter = adapter
 
-        chatViewModel.currentLoginUser.observe(viewLifecycleOwner, { firebaseUser ->
+        chatViewModel.currentLoginUser.observe(viewLifecycleOwner) { firebaseUser ->
             val user = User(firebaseUser.uid, null)
             adapter.currentUser = user
 
-        })
+        }
 
 
-        chatViewModel.messageListLiveDate.observe(viewLifecycleOwner, {
-            //Log.d(TAG, it.toString())
-            adapter.messageList = it
-            adapter.notifyDataSetChanged()
+        chatViewModel.messageListLiveData.observe(viewLifecycleOwner) {
+            Log.d(TAG, it.toString())
+            //adapter.messageList = it
+            //adapter.notifyDataSetChanged()
+            adapter.updateMessageList(it)
             recyclerView.scrollToPosition(adapter.messageList.lastIndex)
-        })
+        }
 
         sendMsgButton.setOnClickListener {
             val messageContent = msgInput.text.toString()

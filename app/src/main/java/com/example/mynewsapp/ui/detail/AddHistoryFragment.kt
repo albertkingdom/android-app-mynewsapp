@@ -1,14 +1,12 @@
-package com.example.mynewsapp.ui
+package com.example.mynewsapp.ui.detail
 
 import android.os.Bundle
-import android.util.Log
 import android.view.*
-import android.widget.RadioGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import com.example.mynewsapp.MainActivity
+import com.example.mynewsapp.MyApplication
 import com.example.mynewsapp.R
 import com.example.mynewsapp.databinding.FragmentAddHistoryBinding
 import com.example.mynewsapp.db.InvestHistory
@@ -17,7 +15,8 @@ import java.util.*
 
 class AddHistoryFragment: Fragment() {
     private lateinit var binding: FragmentAddHistoryBinding
-    private lateinit var viewModel: NewsViewModel
+    //private lateinit var viewModel: NewsViewModel
+    private lateinit var addHistoryViewModel: AddHistoryViewModel
     private val args: AddHistoryFragmentArgs by navArgs()
     var dateSelected: Long? = null
 
@@ -28,7 +27,9 @@ class AddHistoryFragment: Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentAddHistoryBinding.inflate(inflater, container, false)
-        viewModel =(activity as MainActivity).viewModel
+        val repository = (activity?.application as MyApplication).repository
+        addHistoryViewModel = AddHistoryViewModel(repository)
+        //viewModel =(activity as MainActivity).viewModel
         //change toolbar title
         (requireActivity() as AppCompatActivity).supportActionBar?.title = "新增一筆紀錄"
 
@@ -83,7 +84,8 @@ class AddHistoryFragment: Fragment() {
         }
         val newHistory = InvestHistory(0, stockNo = stockNo, amount = amount, price = price, status = isBuy, date = date!!)
 
-        viewModel.insertHistory(newHistory)
+//        viewModel.insertHistory(newHistory)
+        addHistoryViewModel.insertHistory(newHistory)
 
         findNavController().popBackStack()
     }

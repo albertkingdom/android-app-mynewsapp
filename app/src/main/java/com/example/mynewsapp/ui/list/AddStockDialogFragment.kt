@@ -1,4 +1,4 @@
-package com.example.mynewsapp.ui
+package com.example.mynewsapp.ui.list
 
 import android.app.Dialog
 import android.content.DialogInterface
@@ -16,7 +16,8 @@ class AddStockDialogFragment : DialogFragment() {
      * this dialog is for adding new stockNo
      */
     val TAG = "CustomDialogFragment"
-    private val viewModel: NewsViewModel by activityViewModels()
+    //private val viewModel: NewsViewModel by activityViewModels()
+    private val listViewModel: ListViewModel by activityViewModels()
 
 
 
@@ -38,8 +39,9 @@ class AddStockDialogFragment : DialogFragment() {
 
                 val stockNoInput = textView.text.toString().split(" ")[0]
                 if(stockNoInput.isNotEmpty()) {
-                    viewModel.addToStockList(stockNoInput, viewModel.currentSelectedFollowingListId.value!!)
-                    viewModel.getOneFollowingListWithStocks()
+                    listViewModel.addToStockList(stockNoInput, listViewModel.currentSelectedFollowingListId.value!!)
+                    //viewModel.getOneFollowingListWithStocks()
+                    listViewModel.changeCurrentFollowingListId()
                     dismiss()
 
                 }

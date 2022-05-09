@@ -7,7 +7,7 @@
     <include app:graph="@navigation/stock" />
     <fragment
         android:id="@+id/statisticFragment"
-        android:name="com.example.mynewsapp.ui.StatisticFragment"
+        android:name="com.example.mynewsapp.ui.statistics.StatisticFragment"
         android:label="Statistic" />
     <include app:graph="@navigation/news" />
 </navigation>
