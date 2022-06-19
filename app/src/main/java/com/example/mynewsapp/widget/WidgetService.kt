@@ -1,12 +1,12 @@
-package com.example.mynewsapp
+package com.example.mynewsapp.widget
 
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
-import android.util.Log
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
+import com.example.mynewsapp.R
 import com.example.mynewsapp.model.WidgetStockData
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi

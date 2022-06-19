@@ -1,8 +1,5 @@
 package com.example.mynewsapp.ui.list
 
-import android.appwidget.AppWidgetManager
-import android.content.Context
-import android.content.Intent
 import android.graphics.Canvas
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
@@ -19,7 +16,6 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mynewsapp.MainActivity
-import com.example.mynewsapp.StockAppWidgetProvider
 
 import com.example.mynewsapp.R
 import com.example.mynewsapp.adapter.StockInfoAdapter
@@ -27,10 +23,8 @@ import com.example.mynewsapp.databinding.FragmentListBinding
 import com.example.mynewsapp.model.MsgArray
 import com.example.mynewsapp.model.WidgetStockData
 import com.example.mynewsapp.util.Resource
+import com.example.mynewsapp.widget.WidgetUtil.Companion.updateWidget
 import com.google.android.material.snackbar.Snackbar
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.Types
 
 
 class ListFragment : Fragment() {
@@ -81,9 +75,7 @@ class ListFragment : Fragment() {
                             WidgetStockData(stockNo = msgArray.stockNo, stockPrice = msgArray.currentPrice, stockName = msgArray.stockName, yesterDayPrice = msgArray.lastDayPrice)
                         }
 
-                        updateWidget(listOfWidgetStockData)
-
-
+                        updateWidget(listOfWidgetStockData, requireContext())
 
                     }
                     binding.swipeRefresh.isRefreshing = false
@@ -242,25 +234,7 @@ class ListFragment : Fragment() {
         findNavController().navigate(ListFragmentDirections.actionListFragmentToCandleStickChartFragment(stockNo,stockName,stockPrice))
 
     }
-     private fun updateWidget(listOfWidgetStockData: List<WidgetStockData>) {
-         // Send broadcast to widgetProvider to invoke onRecieve method
-         val updateIntent = Intent(context, StockAppWidgetProvider::class.java)
-         updateIntent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
-         context?.sendBroadcast(updateIntent)
 
-
-         // Write stock price info to shared preference
-         val sharedPref = activity?.getSharedPreferences("sharedPref", Context.MODE_PRIVATE) ?: return
-         val moshi = Moshi.Builder()
-             .build()
-         val jsonAdapter: JsonAdapter<List<WidgetStockData>> = moshi.adapter(Types.newParameterizedType(List::class.java, WidgetStockData::class.java))
-
-         val jsonString = jsonAdapter.toJson(listOfWidgetStockData)
-         with (sharedPref.edit()) {
-             putString("sharedPref1", jsonString)
-             apply()
-         }
-     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)

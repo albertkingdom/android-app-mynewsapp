@@ -2,16 +2,24 @@ package com.example.mynewsapp.ui.list
 
 import android.app.Application
 import androidx.lifecycle.*
+import androidx.work.*
+import com.example.mynewsapp.widget.UpdateWidgetPeriodicTask
 import com.example.mynewsapp.MyApplication
 import com.example.mynewsapp.db.FollowingList
 import com.example.mynewsapp.db.FollowingListWithStock
 import com.example.mynewsapp.db.Stock
 import com.example.mynewsapp.model.StockPriceInfoResponse
 import com.example.mynewsapp.repository.NewsRepository
+import com.example.mynewsapp.util.Constant.Companion.WORKER_INPUT_DATA_KEY
 import com.example.mynewsapp.util.Resource
 import com.example.mynewsapp.util.isNetworkAvailable
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
 import kotlinx.coroutines.*
 import retrofit2.Response
+import java.lang.reflect.Type
+import java.util.concurrent.TimeUnit
+
 
 // inherit AndroidViewModel to obtain context
 class ListViewModel(
@@ -89,6 +97,9 @@ class ListViewModel(
                     println("stockNoStringList $stockNoStringList")
                     //getStockNoListAndToQueryStockPriceInfo(stockNoStringList)
 
+                    /// setup workmanager
+                    setupWorkManagerForUpdateWidget(stockNoStringList)
+
                     while (true) {
                         if (!isNetworkAvailable(getApplication())) {
                             stockPrice.value = Resource.Error("No Internet Connection")
@@ -107,7 +118,34 @@ class ListViewModel(
             stockPrice
         }
 
+    private fun setupWorkManagerForUpdateWidget(stockNos: List<String>) {
+        val WORK_TAG = "fetch_stock_price_update_widget"
+        // convert to json string
+        val moshi: Moshi = Moshi.Builder().build()
+        val type: Type = Types.newParameterizedType(
+            List::class.java,
+            String::class.java
+        )
+        val jsonAdapter = moshi.adapter<List<String>>(type)
+        val inputData = Data.Builder()
+            .putString(WORKER_INPUT_DATA_KEY, jsonAdapter.toJson(stockNos))
+            .build()
+        // 建立work request
+        val workRequest =
+            PeriodicWorkRequestBuilder<UpdateWidgetPeriodicTask>(15L, TimeUnit.MINUTES)
+                .addTag(WORK_TAG)
+                .setInputData(inputData)
+                .build()
 
+
+        // 註冊work request 到system
+        // 重複任務(or一次性任務)
+        WorkManager.getInstance(getApplication()).enqueueUniquePeriodicWork(
+            WORK_TAG,
+            ExistingPeriodicWorkPolicy.REPLACE,
+            workRequest
+        )
+    }
     fun fetchSingleList(followingListId: Int): LiveData<FollowingListWithStock> {
         val result = MutableLiveData<FollowingListWithStock>()
         viewModelScope.launch {

@@ -1,4 +1,4 @@
-package com.example.mynewsapp
+package com.example.mynewsapp.widget
 
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
@@ -9,6 +9,8 @@ import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import android.widget.RemoteViews
+import com.example.mynewsapp.MainActivity
+import com.example.mynewsapp.R
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
