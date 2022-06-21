@@ -84,7 +84,6 @@ class AddHistoryFragment: Fragment() {
         }
         val newHistory = InvestHistory(0, stockNo = stockNo, amount = amount, price = price, status = isBuy, date = date!!)
 
-//        viewModel.insertHistory(newHistory)
         addHistoryViewModel.insertHistory(newHistory)
 
         findNavController().popBackStack()

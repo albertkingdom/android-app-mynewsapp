@@ -25,11 +25,11 @@ import com.example.mynewsapp.model.WidgetStockData
 import com.example.mynewsapp.util.Resource
 import com.example.mynewsapp.widget.WidgetUtil.Companion.updateWidget
 import com.google.android.material.snackbar.Snackbar
+import java.lang.RuntimeException
 
 
 class ListFragment : Fragment() {
     private lateinit var binding: FragmentListBinding
-    //private val viewModel: NewsViewModel by activityViewModels()
     private val listViewModel: ListViewModel by activityViewModels()
 
     private lateinit var stockAdapter: StockInfoAdapter
@@ -69,8 +69,6 @@ class ListFragment : Fragment() {
                         val listOfMsgArray = stockInfoResponse.msgArray
                         stockAdapter.submitList(stockInfoResponse.msgArray)
 
-//                        stockAdapter.setData(stockInfoResponse.msgArray.toMutableList())
-
                         val listOfWidgetStockData = listOfMsgArray.map { msgArray ->
                             WidgetStockData(stockNo = msgArray.stockNo, stockPrice = msgArray.currentPrice, stockName = msgArray.stockName, yesterDayPrice = msgArray.lastDayPrice)
                         }
@@ -94,25 +92,11 @@ class ListFragment : Fragment() {
 
         })
 
-        // get following lists and stocks
-//        viewModel.allFollowingList.observe(viewLifecycleOwner) { lists ->
-//            println("allFollowingListWithStock $lists")
-//            if (lists.isEmpty()) {
-//                val followingList = FollowingList(followingListId = 0, listName = "Default")
-//                viewModel.createFollowingList(followingList)
-//            }
-//            if (lists.isNotEmpty()) {
-//                viewModel.currentSelectedFollowingListId.postValue(lists.first().followingListId)
-//            }
-//            (activity as MainActivity).showMenuSelectorBtn(lists)
-//
-//
-//        }
+
         // observe selected list id and get
         listViewModel.currentSelectedFollowingListId.observe(viewLifecycleOwner) { listId ->
             println("currentSelectedFollowingListId  $listId")
-            //viewModel.getOneFollowingListWithStocks(listId)
-//            viewModel.fetchSingleList()
+
         }
 
 
@@ -132,15 +116,12 @@ class ListFragment : Fragment() {
 
                 val currentStockItem = stockAdapter.currentList[viewHolder.adapterPosition]
 
-                //viewModel.deleteStock(currentStockItem.c)
                 listViewModel.deleteStockByStockNoAndListId(currentStockItem.stockNo)
                 listViewModel.deleteAllHistory(currentStockItem.stockNo)
                 Snackbar.make(view, "追蹤股票代號已刪除",Snackbar.LENGTH_LONG).show()
 
-                //viewModel.getOneFollowingListWithStocks()
-
                 stockAdapter.notifyItemChanged(viewHolder.layoutPosition)
-//                stockAdapter.notifyDataSetChanged()
+
             }
 
 
@@ -204,8 +185,6 @@ class ListFragment : Fragment() {
 
     private fun setupSwipeRefresh() {
         binding.swipeRefresh.setOnRefreshListener {
-            //viewModel.cancelRepeatFetchPriceJob()
-            //viewModel.getStockNoListAndToQueryStockPriceInfo()
             listViewModel.changeCurrentFollowingListId()
         }
     }

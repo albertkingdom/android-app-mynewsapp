@@ -14,7 +14,6 @@ import kotlinx.coroutines.withContext
 import java.text.NumberFormat
 
 class CandleStickChartViewModel(val repository: NewsRepository): ViewModel() {
-//    val candleStickData: MutableLiveData<Resource<List<List<String>>>?> = MutableLiveData()
 
     private val _candleData = MutableLiveData<CandleData>()
     private val candleData: LiveData<CandleData> = _candleData
@@ -115,8 +114,6 @@ class CandleStickChartViewModel(val repository: NewsRepository): ViewModel() {
         _candleData.value = candleData
 
         return candleData
-//        _candleDataSet.value = candleDataSet
-//        return candleDataSet
     }
 
     private fun generateBarData(data: List<List<String>>): BarData {
