@@ -1,6 +1,7 @@
 package com.example.mynewsapp.ui.list
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.*
 import androidx.work.*
 import com.example.mynewsapp.widget.UpdateWidgetPeriodicTask
@@ -15,8 +16,17 @@ import com.example.mynewsapp.util.Resource
 import com.example.mynewsapp.util.isNetworkAvailable
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Flowable
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.Observer
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.disposables.Disposable
 import kotlinx.coroutines.*
+import retrofit2.HttpException
 import retrofit2.Response
+import retrofit2.Retrofit
 import java.lang.reflect.Type
 import java.util.concurrent.TimeUnit
 
@@ -26,12 +36,12 @@ class ListViewModel(
     val repository: NewsRepository,
     application: Application
 ) : AndroidViewModel(application) {
-
+    companion object {
+        const val TAG = "ListViewModel"
+    }
     val currentSelectedFollowingListId: MutableLiveData<Int> = MutableLiveData(0)
 
     val allFollowingList: LiveData<List<FollowingList>> = repository.allFollowingList.asLiveData()
-
-    private var fetchPriceJob: Job? = null
 
     val appBarMenuButtonTitle = currentSelectedFollowingListId.map { listId ->
         allFollowingList.value?.find { list -> list.followingListId == listId }?.listName
@@ -53,12 +63,64 @@ class ListViewModel(
         return@map listNameArrayAndEdit
     }
 
+    val stockPriceInfo = MutableLiveData<Resource<StockPriceInfoResponse>>()
+
+    val compositeDisposable = CompositeDisposable()
+
     init {
         println("ListViewModel INIT")
     }
+    /*
+    1. change following list id
+    2. fetch single list -> followingListWithStocks
+    3. stockPriceInfo
+     */
+    private fun setupGetStockPriceDataPipe(followingListId: Int) {
+        compositeDisposable.clear() // cancel existing subscription
 
+        val observable = Observable.just(followingListId)
+
+        val observer = object : Observer<Resource<StockPriceInfoResponse>> {
+            override fun onSubscribe(d: Disposable) {
+                //Log.d(TAG, "onSubscribe")
+                compositeDisposable.add(d)
+            }
+
+            override fun onNext(t: Resource<StockPriceInfoResponse>) {
+                //Log.d(TAG, "onNext ${t.data?.msgArray}")
+                stockPriceInfo.value = t
+            }
+
+            override fun onError(e: Throwable) {
+                //Log.d(TAG, "onError $e")
+                stockPriceInfo.value = e.message?.let { Resource.Error(it) }
+            }
+
+            override fun onComplete() {
+                //Log.d(TAG, "onComplete")
+            }
+        }
+        // repeat every 5 min
+        observable
+            .repeatWhen { complete -> complete.delay(5, TimeUnit.MINUTES) }
+            .flatMap { num ->
+                fetchSingleListRx(num).toObservable()
+            }
+            .flatMap { list ->
+                if (isNetworkAvailable(getApplication())) {
+                    fetchStockPriceInfoRx(list).toObservable()
+                } else {
+                    Observable.error(Throwable("No Internet Connection"))
+                }
+            }
+            .retry(2)
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(observer)
+    }
     fun changeCurrentFollowingList(index: Int) {
+        val followingListId = allFollowingList.value?.get(index)?.followingListId!!
         currentSelectedFollowingListId.value = allFollowingList.value?.get(index)?.followingListId
+        setupGetStockPriceDataPipe(followingListId)
     }
     fun createFollowingList(followingList: FollowingList) {
         viewModelScope.launch {
@@ -69,54 +131,19 @@ class ListViewModel(
     fun changeCurrentFollowingListId(id: Int? = currentSelectedFollowingListId.value) {
         if (id !== null) {
             currentSelectedFollowingListId.value = id
+            setupGetStockPriceDataPipe(id)
         }
     }
 
-    // observe currentSelectedListId -> fetchSingleList -> change followingListWithStocks
-    val followingListWithStocks = currentSelectedFollowingListId.switchMap { id ->
-        fetchSingleList(id)
+
+    private fun fetchStockPriceInfoRx(followingListWithStocks: FollowingListWithStock): Single<Resource<StockPriceInfoResponse>> {
+        val stockNoStringList = followingListWithStocks.stocks.map { stock -> stock.stockNo }
+        println("stockNoStringList $stockNoStringList")
+        // setup workmanager
+        setupWorkManagerForUpdateWidget(stockNoStringList)
+        return getStockPriceInfoRx(stockNoStringList)
     }
-    val stockPriceInfo =
-        Transformations.switchMap(followingListWithStocks) { listWithStock ->
-            println("singleFollowingListWithStocks $listWithStock")
-            //var result: FollowingListWithStock? = null
-            val stockPrice = MutableLiveData<Resource<StockPriceInfoResponse>>()
 
-            if (listWithStock == null || listWithStock.stocks.isEmpty()) {
-                stockPrice.value = Resource.Success(StockPriceInfoResponse(msgArray = listOf()))
-
-                return@switchMap stockPrice
-            }
-            fetchPriceJob?.cancel()
-
-            fetchPriceJob = viewModelScope.launch {
-
-                if (listWithStock != null) {
-
-                    val stockNoStringList = listWithStock.stocks.map { stock -> stock.stockNo }
-                    println("stockNoStringList $stockNoStringList")
-                    //getStockNoListAndToQueryStockPriceInfo(stockNoStringList)
-
-                    /// setup workmanager
-                    setupWorkManagerForUpdateWidget(stockNoStringList)
-
-                    while (true) {
-                        if (!isNetworkAvailable(getApplication())) {
-                            stockPrice.value = Resource.Error("No Internet Connection")
-                            delay(1000 * 1 * 60)
-                            continue
-                        }
-                        stockPrice.value = getStockPriceInfo(stockNoStringList).await()
-                        delay(1000 * 1 * 60 * 2)
-                    }
-
-                }
-            }
-
-            println("stockPrice $stockPrice")
-            //MutableLiveData<Int>()
-            stockPrice
-        }
 
     private fun setupWorkManagerForUpdateWidget(stockNos: List<String>) {
         val WORK_TAG = "fetch_stock_price_update_widget"
@@ -146,38 +173,27 @@ class ListViewModel(
             workRequest
         )
     }
-    fun fetchSingleList(followingListId: Int): LiveData<FollowingListWithStock> {
-        val result = MutableLiveData<FollowingListWithStock>()
-        viewModelScope.launch {
-            result.value = repository.getOneListWithStocks(followingListId)
 
-        }
-        return result
+    private fun fetchSingleListRx(followingListId: Int): Flowable<FollowingListWithStock> {
+        return repository.getOneListWithStocksRx(followingListId)
     }
-
     fun deleteFollowingList(followingListId: Int) {
-
         viewModelScope.launch {
             repository.deleteFollowingList(followingListId)
         }
-
     }
 
-    private fun getStockPriceInfo(stockList: List<String>): Deferred<Resource<StockPriceInfoResponse>> =
-
-        viewModelScope.async {
-
-            val stockListString: String = stockList.joinToString("|") {
-                "tse_${it}.tw"
-            }
-
-            val response = repository.getStockPriceInfo(stockNo = stockListString)
-            val result = handleStockPriceInfoResponse(response)
-            result
-
+    private fun getStockPriceInfoRx(stockList: List<String>): Single<Resource<StockPriceInfoResponse>> {
+        val stockListString: String = stockList.joinToString("|") {
+            "tse_${it}.tw"
         }
+        val response = repository.getStockPriceInfoRx(stockListString)
+        return response
+            .map {
+                handleStockPriceInfoResponse(it)
+            }
+    }
 
-    //get stockprice
     private fun handleStockPriceInfoResponse(response: Response<StockPriceInfoResponse>): Resource<StockPriceInfoResponse> {
         if (response.isSuccessful) {
             response.body()?.let { resultResponse ->
@@ -188,14 +204,10 @@ class ListViewModel(
     }
 
     fun addToStockList(stockNo: String, followingListId: Int) {
-
         viewModelScope.launch {
-
             println("addToStockList stockNo = $stockNo")
             repository.insert(stock = Stock(0, stockNo, followingListId))
-
         }
-
     }
 
     fun deleteStockByStockNoAndListId(
@@ -214,11 +226,10 @@ class ListViewModel(
         }
     }
 
-
-    fun cancelRepeatFetchPriceJob() {
-        fetchPriceJob?.cancel()
+    override fun onCleared() {
+        super.onCleared()
+        compositeDisposable.clear()
     }
-
 }
 
 class ListViewModelFactory(val repository: NewsRepository, val application: MyApplication): ViewModelProvider.Factory {

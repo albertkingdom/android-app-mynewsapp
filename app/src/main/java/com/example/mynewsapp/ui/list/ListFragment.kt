@@ -3,7 +3,6 @@ package com.example.mynewsapp.ui.list
 import android.graphics.Canvas
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
-import android.opengl.Visibility
 import android.os.Bundle
 
 import android.util.Log
@@ -258,7 +257,7 @@ class ListFragment : Fragment() {
     override fun onStop() {
         super.onStop()
         Log.d(TAG, "onstop")
-        listViewModel.cancelRepeatFetchPriceJob()
+
         (activity as MainActivity).hideMenuSelectorBtn()
     }
 }

@@ -12,6 +12,9 @@ import com.example.mynewsapp.util.Constant.Companion.API_KEY
 import com.example.mynewsapp.util.Constant.Companion.BASE_URL_CANDLE_STICK_DATA
 import com.example.mynewsapp.util.Constant.Companion.BASE_URL_NEWS
 import com.example.mynewsapp.util.Constant.Companion.BASE_URL_STOCK_PRICE
+import io.reactivex.rxjava3.core.Flowable
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.Single
 import kotlinx.coroutines.flow.Flow
 import retrofit2.Response
 
@@ -29,7 +32,9 @@ class NewsRepository(val stockDao: StockDao) {
 //        return RetrofitInstanceForStockPrice.retrofitService.getStockPriceInfo(stockNo)
         return RetrofitInstanceForGeneralUse.retrofitServiceForStockInfo.getStockPriceInfo("${BASE_URL_STOCK_PRICE}api/getStockInfo.jsp?ex_ch=$stockNo&json=1")
     }
-
+    fun getStockPriceInfoRx(stockNo:String): Single<Response<StockPriceInfoResponse>> {
+        return RetrofitInstanceForGeneralUse.retrofitServiceForStockInfo.getStockPriceInfoRx("${BASE_URL_STOCK_PRICE}api/getStockInfo.jsp?ex_ch=$stockNo&json=1")
+    }
     val allstocks: Flow<List<Stock>> =stockDao.getAllStocks()
 
     val allFollowingList: Flow<List<FollowingList>> = stockDao.getAllFollowingList()
@@ -41,6 +46,9 @@ class NewsRepository(val stockDao: StockDao) {
     }
     suspend fun getOneListWithStocks(followingListId: Int): FollowingListWithStock{
         return stockDao.getListsWithStocks(followingListId)
+    }
+    fun getOneListWithStocksRx(followingListId: Int): Flowable<FollowingListWithStock> {
+        return stockDao.getListsWithStocksRx(followingListId)
     }
     suspend fun insertFollowingList(followingList: FollowingList) {
         stockDao.insertFollowingList(followingList = followingList)

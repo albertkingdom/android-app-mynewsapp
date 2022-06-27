@@ -1,6 +1,8 @@
 package com.example.mynewsapp.db
 
+import android.database.Observable
 import androidx.room.*
+import io.reactivex.rxjava3.core.Flowable
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -46,6 +48,10 @@ interface StockDao {
     @Transaction
     @Query("SELECT * FROM followingList WHERE followingListId = :followingListId")
     suspend fun getListsWithStocks(followingListId: Int): FollowingListWithStock
+
+    @Transaction
+    @Query("SELECT * FROM followingList WHERE followingListId = :followingListId")
+    fun getListsWithStocksRx(followingListId: Int): Flowable<FollowingListWithStock>
 
     @Transaction
     @Query("SELECT * FROM followingList")
