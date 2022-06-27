@@ -77,12 +77,15 @@ class ListFragment : Fragment() {
 
                     }
                     binding.swipeRefresh.isRefreshing = false
+                    toggleNetworkConnectionLostIcon(false)
                 }
                 is Resource.Error -> {
 
                     response.message?.let { message ->
                         Log.e("stock list fragment", "An error occured: $message")
                         Snackbar.make(view, "An error occured: $message", Snackbar.LENGTH_LONG).show()
+                        binding.swipeRefresh.isRefreshing = false
+                        toggleNetworkConnectionLostIcon(true)
                     }
                 }
                 is Resource.Loading -> {
@@ -239,6 +242,18 @@ class ListFragment : Fragment() {
 
     }
 
+    private fun toggleNetworkConnectionLostIcon(isNetworkError: Boolean) {
+        when (isNetworkError) {
+            true -> {
+                binding.networkNotAvailable.visibility = View.VISIBLE
+                binding.stockListRecyclerview.visibility = View.GONE
+            }
+            false -> {
+                binding.networkNotAvailable.visibility = View.GONE
+                binding.stockListRecyclerview.visibility = View.VISIBLE
+            }
+        }
+    }
     override fun onStop() {
         super.onStop()
         Log.d(TAG, "onstop")
