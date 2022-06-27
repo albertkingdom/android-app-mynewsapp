@@ -18,7 +18,7 @@ import com.example.mynewsapp.databinding.ItemStockinfoBinding
 
 
 class StockInfoAdapter(val onClick: (Stock: MsgArray)->Unit, val toCandleStickChart: (Stock: MsgArray)->Unit):ListAdapter<MsgArray, StockInfoAdapter.StockViewHolder>(DiffCallback), Filterable {
-    private var list = mutableListOf<MsgArray>()
+    private var list = listOf<MsgArray>()
 
     companion object {
         private val DiffCallback = object : DiffUtil.ItemCallback<MsgArray>(){
@@ -32,8 +32,8 @@ class StockInfoAdapter(val onClick: (Stock: MsgArray)->Unit, val toCandleStickCh
 
         }
     }
-
-    fun setData(list: MutableList<MsgArray>?){
+    // set data for this adapter
+    fun setData(list: List<MsgArray>?){
         this.list = list!!
         submitList(list)
     }
@@ -124,7 +124,7 @@ class StockInfoAdapter(val onClick: (Stock: MsgArray)->Unit, val toCandleStickCh
         }
 
         override fun publishResults(p0: CharSequence?, filterResults: FilterResults?) {
-
+            println("publishResults ${filterResults?.values}")
             submitList(filterResults?.values as MutableList<MsgArray>)
         }
 
