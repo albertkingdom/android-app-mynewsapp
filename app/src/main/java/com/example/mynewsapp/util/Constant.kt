@@ -7,5 +7,7 @@ class Constant {
         const val BASE_URL_STOCK_PRICE = "https://mis.twse.com.tw/stock/"
         const val BASE_URL_CANDLE_STICK_DATA = "https://www.twse.com.tw/exchangeReport/"
         const val WORKER_INPUT_DATA_KEY = "STOCK_NO_LIST"
+
+        const val NO_INTERNET_CONNECTION = "No Internet Connection"
     }
 }

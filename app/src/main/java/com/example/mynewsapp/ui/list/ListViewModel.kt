@@ -11,6 +11,7 @@ import com.example.mynewsapp.db.FollowingListWithStock
 import com.example.mynewsapp.db.Stock
 import com.example.mynewsapp.model.StockPriceInfoResponse
 import com.example.mynewsapp.repository.NewsRepository
+import com.example.mynewsapp.util.Constant.Companion.NO_INTERNET_CONNECTION
 import com.example.mynewsapp.util.Constant.Companion.WORKER_INPUT_DATA_KEY
 import com.example.mynewsapp.util.Resource
 import com.example.mynewsapp.util.isNetworkAvailable
@@ -107,10 +108,13 @@ class ListViewModel(
                 fetchSingleListRx(num).toObservable()
             }
             .flatMap { list ->
-                if (isNetworkAvailable(getApplication())) {
+                if (list.stocks.isEmpty() && isNetworkAvailable(getApplication())) {
+                    // return empty array, don't fetch api
+                    Observable.just(Resource.Success(StockPriceInfoResponse(listOf())))
+                } else if (isNetworkAvailable(getApplication())) {
                     fetchStockPriceInfoRx(list).toObservable()
                 } else {
-                    Observable.error(Throwable("No Internet Connection"))
+                    Observable.error(Throwable(NO_INTERNET_CONNECTION))
                 }
             }
             .retry(2)

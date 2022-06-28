@@ -22,6 +22,7 @@ import com.example.mynewsapp.adapter.StockInfoAdapter
 import com.example.mynewsapp.databinding.FragmentListBinding
 import com.example.mynewsapp.model.MsgArray
 import com.example.mynewsapp.model.WidgetStockData
+import com.example.mynewsapp.util.Constant.Companion.NO_INTERNET_CONNECTION
 import com.example.mynewsapp.util.Resource
 import com.example.mynewsapp.widget.WidgetUtil.Companion.updateWidget
 import com.google.android.material.snackbar.Snackbar
@@ -66,6 +67,8 @@ class ListFragment : Fragment() {
             when (response) {
                 is Resource.Success -> {
                     response.data?.let { stockInfoResponse ->
+                        Log.d("stock list fragment", stockInfoResponse.toString())
+
                         val listOfMsgArray = stockInfoResponse.msgArray
                         stockAdapter.setData(listOfMsgArray)
 
@@ -80,12 +83,13 @@ class ListFragment : Fragment() {
                     toggleNetworkConnectionLostIcon(false)
                 }
                 is Resource.Error -> {
-
                     response.message?.let { message ->
                         Log.e("stock list fragment", "An error occured: $message")
                         Snackbar.make(view, "An error occured: $message", Snackbar.LENGTH_LONG).show()
                         binding.swipeRefresh.isRefreshing = false
-                        toggleNetworkConnectionLostIcon(true)
+                        when (message) {
+                            NO_INTERNET_CONNECTION -> toggleNetworkConnectionLostIcon(true)
+                        }
                     }
                 }
                 is Resource.Loading -> {

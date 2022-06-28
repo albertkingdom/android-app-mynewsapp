@@ -9,6 +9,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Filter
 import android.widget.Filterable
+import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.getColor
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -54,6 +56,7 @@ class StockInfoAdapter(val onClick: (Stock: MsgArray)->Unit, val toCandleStickCh
             stockPrice.text = String.format("%.2f",handleStockPrice(currentStock).toFloat())
             val diff = handleStockPrice(currentStock).toFloat() - currentStock.lastDayPrice.toFloat()
 
+            stockPriceDiff.setTextColor(getColor(this.stockPriceDiff.context, R.color.white))
 
             if(diff<0f) {
                 stockPriceDiff.setBackgroundResource(R.color.green)
