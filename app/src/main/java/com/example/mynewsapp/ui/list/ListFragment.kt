@@ -198,9 +198,7 @@ class ListFragment : Fragment() {
 
     private fun setupOnClickFab() {
         binding.floatingBtn.setOnClickListener {
-            val dialog = AddStockDialogFragment()
-
-            dialog.show(parentFragmentManager,"stock")
+            findNavController().navigate(ListFragmentDirections.actionStockListFragmentToAddStockFragment())
         }
 
     }

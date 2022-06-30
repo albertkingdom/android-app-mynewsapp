@@ -1,5 +1,6 @@
 package com.example.mynewsapp.repository
 
+import androidx.lifecycle.LiveData
 import com.example.mynewsapp.model.NewsResponse
 import com.example.mynewsapp.model.StockPriceInfoResponse
 import com.example.mynewsapp.api.RetrofitInstance
@@ -44,7 +45,7 @@ class NewsRepository(val stockDao: StockDao) {
         stockDao.getAllFollowingList()
 
     }
-    suspend fun getOneListWithStocks(followingListId: Int): FollowingListWithStock{
+    suspend fun getOneListWithStocks(followingListId: Int): FollowingListWithStock {
         return stockDao.getListsWithStocks(followingListId)
     }
     fun getOneListWithStocksRx(followingListId: Int): Flowable<FollowingListWithStock> {
