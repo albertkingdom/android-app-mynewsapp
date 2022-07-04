@@ -100,8 +100,7 @@ class CandleStickChartViewModel(val repository: NewsRepository): ViewModel() {
         }
         val candleDataSet = CandleDataSet(candleStickEntry, stockNo)
         candleDataSet.apply {
-            //shadowColor = getColor(requireContext(),R.color.black)
-            decreasingColor = Color.GREEN
+            decreasingColor = Color.parseColor("#008000")
             increasingColor = Color.RED
             decreasingPaintStyle = Paint.Style.FILL
             increasingPaintStyle = Paint.Style.FILL
