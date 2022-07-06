@@ -57,4 +57,10 @@
         <item name="hintTextColor">@color/black</item>
 
     </style>
+
+<!--    news page-->
+    <style name="roundedImageView" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">8dp</item>
+    </style>
 </resources>

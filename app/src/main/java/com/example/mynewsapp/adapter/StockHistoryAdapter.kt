@@ -59,7 +59,7 @@ class StockHistoryAdapter: ListAdapter<InvestHistory, StockHistoryAdapter.StockH
             if (revenue.toFloat() > 0) {
                 revenueView.setTextColor(Color.RED)
             }else{
-                revenueView.setTextColor(Color.GREEN)
+                revenueView.setTextColor(this.revenueView.resources.getColor(R.color.green, null))
             }
             // click to get the history date in 110/10/10 format
             itemView.setOnClickListener {

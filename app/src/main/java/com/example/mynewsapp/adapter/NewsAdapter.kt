@@ -1,5 +1,6 @@
 package com.example.mynewsapp.adapter
 
+import android.graphics.drawable.Drawable
 import com.example.mynewsapp.model.Article
 import android.view.LayoutInflater
 import android.view.View
@@ -10,6 +11,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.CustomTarget
 import com.example.mynewsapp.R
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -33,14 +35,12 @@ class NewsAdapter : ListAdapter<Article, NewsAdapter.ArticleViewHolder>(DiffCall
 
     class ArticleViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val titleView = view.findViewById<TextView>(R.id.tvTitle)
-        val descriptionView = view.findViewById<TextView>(R.id.tvDescription)
-        val sourceView = view.findViewById<TextView>(R.id.tvSource)
         val publishedAtView = view.findViewById<TextView>(R.id.tvPublishedAt)
         val articleImageView = view.findViewById<ImageView>(R.id.ivArticleImage)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ArticleViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_article, parent, false)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_news_article, parent, false)
         return ArticleViewHolder(view)
     }
 
@@ -51,10 +51,23 @@ class NewsAdapter : ListAdapter<Article, NewsAdapter.ArticleViewHolder>(DiffCall
 
         holder.apply {
             titleView.text = currentArticle.title
-            descriptionView.text = currentArticle.description
-            sourceView.text = currentArticle.source.name
 
-            Glide.with(this.itemView).load(currentArticle.urlToImage).into(articleImageView)
+            Glide
+                .with(this.itemView)
+                .load(currentArticle.urlToImage)
+                .centerCrop()
+                .into(object : CustomTarget<Drawable>() {
+                    override fun onResourceReady(
+                        resource: Drawable,
+                        transition: com.bumptech.glide.request.transition.Transition<in Drawable>?
+                    ) {
+                        // load as imageView background
+                        articleImageView.background = resource
+                    }
+
+                    override fun onLoadCleared(placeholder: Drawable?) {
+                    }
+                })
             // format publishedAt time
             val inputPattern = DateTimeFormatter.ISO_INSTANT.withZone(ZoneId.systemDefault())
             val outputPattern = DateTimeFormatter.ofPattern("yyyy/MM/dd kk:mm")

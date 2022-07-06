@@ -16,6 +16,9 @@
         <action
             android:id="@+id/action_stockListFragment_to_editFollowingListFragment"
             app:destination="@id/editFollowingListFragment" />
+        <action
+            android:id="@+id/action_stockListFragment_to_addStockFragment"
+            app:destination="@id/addStockFragment" />
     </fragment>
     <fragment
         android:id="@+id/candleStickChartFragment"
@@ -60,4 +63,9 @@
             android:id="@+id/action_editFollowingListFragment_to_addFollowingListDialogFragment"
             app:destination="@id/addFollowingListDialogFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/addStockFragment"
+        android:name="com.example.mynewsapp.ui.list.AddStockFragment"
+        android:label="fragment_add_stock_to_list"
+        tools:layout="@layout/fragment_add_stock_to_list" />
 </navigation>

@@ -18,12 +18,11 @@ import com.example.mynewsapp.util.isNetworkAvailable
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.core.Flowable
-import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.*
 import io.reactivex.rxjava3.core.Observer
-import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.disposables.Disposable
+import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.coroutines.*
 import retrofit2.HttpException
 import retrofit2.Response
@@ -66,6 +65,8 @@ class ListViewModel(
 
     val stockPriceInfo = MutableLiveData<Resource<StockPriceInfoResponse>>()
 
+    val stockIdsInCurrentList = MutableLiveData<List<String>>() // a copy of following stock ids
+
     val compositeDisposable = CompositeDisposable()
 
     init {
@@ -78,7 +79,6 @@ class ListViewModel(
      */
     private fun setupGetStockPriceDataPipe(followingListId: Int) {
         compositeDisposable.clear() // cancel existing subscription
-
         val observable = Observable.just(followingListId)
 
         val observer = object : Observer<Resource<StockPriceInfoResponse>> {
@@ -88,7 +88,6 @@ class ListViewModel(
             }
 
             override fun onNext(t: Resource<StockPriceInfoResponse>) {
-                //Log.d(TAG, "onNext ${t.data?.msgArray}")
                 stockPriceInfo.value = t
             }
 
@@ -103,10 +102,18 @@ class ListViewModel(
         }
         // repeat every 5 min
         observable
+            .subscribeOn(Schedulers.io())
             .repeatWhen { complete -> complete.delay(5, TimeUnit.MINUTES) }
             .flatMap { num ->
+                // use flowable so that new data will be auto emitted
                 fetchSingleListRx(num).toObservable()
             }
+            .observeOn(AndroidSchedulers.mainThread())
+            .flatMap { list ->
+                getCurrentStockIds(list)
+                Observable.just(list)
+            }
+            .observeOn(Schedulers.io())
             .flatMap { list ->
                 if (list.stocks.isEmpty() && isNetworkAvailable(getApplication())) {
                     // return empty array, don't fetch api
@@ -207,10 +214,11 @@ class ListViewModel(
         return Resource.Error(response.message())
     }
 
-    fun addToStockList(stockNo: String, followingListId: Int) {
+    fun addToStockList(stockNo: String, followingListId: Int = currentSelectedFollowingListId.value!!) {
         viewModelScope.launch {
-            println("addToStockList stockNo = $stockNo")
-            repository.insert(stock = Stock(0, stockNo, followingListId))
+            if (stockIdsInCurrentList.value?.indexOf(stockNo) == -1) {
+                repository.insert(stock = Stock(0, stockNo, followingListId))
+            }
         }
     }
 
@@ -222,6 +230,12 @@ class ListViewModel(
             repository.deleteStockByStockNoAndListId(stockNo, followingListId)
             changeCurrentFollowingListId()
         }
+    }
+    private fun getCurrentStockIds(list: FollowingListWithStock) {
+        val stockIds = list.stocks.map { stock ->
+            stock.stockNo
+        }
+        stockIdsInCurrentList.value = stockIds
     }
 
     fun deleteAllHistory(stockNo: String) {

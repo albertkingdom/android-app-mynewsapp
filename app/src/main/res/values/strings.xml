@@ -29,7 +29,7 @@
     <string name="dialog_confirm_button">OK</string>
 
     <string name="stockhistory_revenue">%1$s%%</string>
-
+    <string name="add_stock_date_string">%1$d-%2$d-%3$d</string>
 <!--    widget -->
     <string name="widget_update_time">%1$s</string>
 </resources>

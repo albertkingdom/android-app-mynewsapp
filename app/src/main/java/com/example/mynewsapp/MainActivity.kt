@@ -87,7 +87,7 @@ class MainActivity : AppCompatActivity() {
         setupAppBarMenu()
     }
     fun hideMenuSelectorBtn() {
-        binding.showListMenuButton.visibility = View.INVISIBLE
+        binding.showListMenuButton.visibility = View.GONE
     }
     private fun setupAppBarMenu() {
         val menuSelectorButton = binding.showListMenuButton

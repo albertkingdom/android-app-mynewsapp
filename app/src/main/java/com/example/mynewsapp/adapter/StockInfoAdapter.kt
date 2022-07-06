@@ -73,7 +73,7 @@ class StockInfoAdapter(val onClick: (Stock: MsgArray)->Unit, val toCandleStickCh
                     String.format("%.2f", diff)
                 )
             }else{
-                stockPriceDiff.setBackgroundResource(R.color.white)
+                stockPriceDiff.setBackgroundColor(Color.TRANSPARENT)
                 stockPriceDiff.setTextColor(Color.GRAY)
                 stockPriceDiff.text = holder.itemView.context.getString(
                     R.string.stockprice_diff,
@@ -82,15 +82,11 @@ class StockInfoAdapter(val onClick: (Stock: MsgArray)->Unit, val toCandleStickCh
                 )
             }
 
-            root.setOnClickListener { it ->
-//                onClick(currentStock)
+            root.setOnClickListener { _ ->
                 toCandleStickChart(currentStock)
 
             }
 
-//            showCandleStickChart.setOnClickListener {
-//                toCandleStickChart(currentStock)
-//            }
         }
 
 

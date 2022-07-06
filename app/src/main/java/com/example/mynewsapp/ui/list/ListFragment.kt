@@ -198,11 +198,10 @@ class ListFragment : Fragment() {
 
     private fun setupOnClickFab() {
         binding.floatingBtn.setOnClickListener {
-            val dialog = AddStockDialogFragment()
+            findNavController().navigate(ListFragmentDirections.actionStockListFragmentToAddStockFragment())
 
-            dialog.show(parentFragmentManager,"stock")
+            it.visibility = View.INVISIBLE
         }
-
     }
     private val getStockNameToGetRelatedNews:(stockContent: MsgArray)->Unit = { stockContent->
 
