@@ -199,8 +199,9 @@ class ListFragment : Fragment() {
     private fun setupOnClickFab() {
         binding.floatingBtn.setOnClickListener {
             findNavController().navigate(ListFragmentDirections.actionStockListFragmentToAddStockFragment())
-        }
 
+            it.visibility = View.INVISIBLE
+        }
     }
     private val getStockNameToGetRelatedNews:(stockContent: MsgArray)->Unit = { stockContent->
 

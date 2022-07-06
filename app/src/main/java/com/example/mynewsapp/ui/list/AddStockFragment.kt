@@ -1,6 +1,7 @@
 package com.example.mynewsapp.ui.list
 
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
@@ -24,7 +25,7 @@ class AddStockFragment: Fragment() {
     lateinit var binding: FragmentAddStockToListBinding
     lateinit var adapter: StockIdAndNameAdapter
     lateinit var recyclerView: RecyclerView
-
+    lateinit var searchView: SearchView
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -70,10 +71,11 @@ class AddStockFragment: Fragment() {
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.add_stock_options_menu, menu)
-        val searchView = menu.findItem(R.id.app_bar_search).actionView as SearchView
+        searchView = menu.findItem(R.id.app_bar_search).actionView as SearchView
 
-        searchView.setIconifiedByDefault(false)
         searchView.apply {
+            maxWidth = Int.MAX_VALUE
+            isIconified = false
             queryHint = "請輸入代號"
             setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(p0: String?): Boolean {
@@ -95,6 +97,8 @@ class AddStockFragment: Fragment() {
         }
     }
 
-
-
+    override fun onDestroyView() {
+        super.onDestroyView()
+        searchView.clearFocus()
+    }
 }

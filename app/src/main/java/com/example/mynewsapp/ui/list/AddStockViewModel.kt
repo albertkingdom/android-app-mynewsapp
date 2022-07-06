@@ -27,7 +27,7 @@ class AddStockViewModel: ViewModel() {
     }
     fun filterSearchQuery() {
         compositeDisposable.clear()
-        Log.d(TAG, "filterSearchQuery")
+        //Log.d(TAG, "filterSearchQuery")
         //Log.d(TAG, "following ids $followingStockIds")
         val observer = object : Observer<List<String>> {
             override fun onSubscribe(d: Disposable) {
@@ -35,7 +35,7 @@ class AddStockViewModel: ViewModel() {
             }
 
             override fun onNext(listOfString: List<String>) {
-                Log.d(TAG, "filterSearchQuery onNext $listOfString")
+                //Log.d(TAG, "filterSearchQuery onNext $listOfString")
                 val stockNameAndStarList = listOfString.map { stockIdName ->
                     val stockId = stockIdName.split(" ").first()
                     if (followingStockIds.indexOf(stockId) != -1) {
