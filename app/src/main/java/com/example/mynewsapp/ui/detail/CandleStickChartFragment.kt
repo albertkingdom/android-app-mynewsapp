@@ -82,18 +82,7 @@ class CandleStickChartFragment: Fragment() {
             setupOnClickChart(data)
             initOpenCloseHighLowValue(data.last()[7])
         }
-        // show or hide chart
-        binding.hideShowButton.setOnClickListener {
-            binding.chartContainer.updateLayoutParams {
-                 if(this.height == ViewGroup.LayoutParams.WRAP_CONTENT)   {
-                    this.height = 0
-                     binding.hideShowButton.setImageResource(R.drawable.ic_arrow_drop_down)
-                } else {
-                    this.height = ViewGroup.LayoutParams.WRAP_CONTENT
-                     binding.hideShowButton.setImageResource(R.drawable.ic_arrow_drop_up)
-                 }
-            }
-        }
+
     }
 
     private fun setupListAdapter() {

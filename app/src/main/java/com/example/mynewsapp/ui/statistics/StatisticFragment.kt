@@ -1,5 +1,6 @@
 package com.example.mynewsapp.ui.statistics
 
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,12 +10,14 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mynewsapp.MyApplication
+import com.example.mynewsapp.R
 import com.example.mynewsapp.adapter.StatisticAdapter
 import com.example.mynewsapp.databinding.FragmentStatisticBinding
 import com.example.mynewsapp.ui.list.ListViewModel
 import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.components.Description
 import com.github.mikephil.charting.formatter.PercentFormatter
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class StatisticFragment: Fragment() {
     val TAG = "StatisticFragment"
@@ -72,6 +75,7 @@ class StatisticFragment: Fragment() {
             if(listOfStockStatistic.isEmpty()){
                 textRemind.visibility = View.VISIBLE
                 pieChart.visibility = View.GONE
+                showDialog()
                 return@observe
             }
             adapter.submitList(listOfStockStatistic)
@@ -97,5 +101,13 @@ class StatisticFragment: Fragment() {
             }
 
         }
+    }
+
+    private fun showDialog() {
+        MaterialAlertDialogBuilder(requireContext(), R.style.AddFollowingListDialogTheme)
+            .setTitle("投資紀錄")
+            .setMessage("請新增至少一筆投資紀錄")
+            .setPositiveButton("Ok", DialogInterface.OnClickListener { _, _ ->  })
+            .show()
     }
 }

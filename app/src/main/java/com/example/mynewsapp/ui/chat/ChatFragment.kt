@@ -12,8 +12,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.mynewsapp.R
 import com.example.mynewsapp.adapter.MessageListAdapter
+import com.example.mynewsapp.databinding.FragmentChatBinding
 import com.example.mynewsapp.model.Message
 import com.example.mynewsapp.model.User
 import java.util.*
@@ -22,12 +24,13 @@ import kotlin.collections.HashMap
 
 class ChatFragment : Fragment() {
     private val args: ChatFragmentArgs by navArgs()
-
+    private lateinit var binding: FragmentChatBinding
     private val chatViewModel: ChatViewModel by viewModels()
     lateinit var adapter: MessageListAdapter
     lateinit var recyclerView: RecyclerView
     lateinit var sendMsgButton: Button
     lateinit var msgInput: EditText
+    lateinit var swipeRefresh: SwipeRefreshLayout
     companion object {
         val TAG = "ChatFragment"
     }
@@ -40,20 +43,26 @@ class ChatFragment : Fragment() {
 
         chatViewModel.checkIsSignIn()
 
-        return inflater.inflate(R.layout.fragment_chat, container, false)
+        binding = FragmentChatBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        recyclerView = view.findViewById(R.id.recyclerview_chat)
-        sendMsgButton = view.findViewById(R.id.button_gchat_send)
-        msgInput = view.findViewById(R.id.edit_gchat_message)
+        recyclerView = binding.recyclerviewChat
+        sendMsgButton = binding.buttonGchatSend
+        msgInput = binding.editGchatMessage
+        swipeRefresh = binding.swipeRefresh
         //change toolbar title
         (requireActivity() as AppCompatActivity).supportActionBar?.title = "${args.stockNo} chat room"
 
         adapter = MessageListAdapter()
         recyclerView.adapter = adapter
 
+        swipeRefresh.isRefreshing = true
+        swipeRefresh.setOnRefreshListener {
+            swipeRefresh.isRefreshing = false
+        }
         chatViewModel.currentLoginUser.observe(viewLifecycleOwner) { firebaseUser ->
             val user = User(firebaseUser.uid, null)
             adapter.currentUser = user
@@ -63,6 +72,7 @@ class ChatFragment : Fragment() {
 
         chatViewModel.messageListLiveData.observe(viewLifecycleOwner) {
             Log.d(TAG, it.toString())
+            swipeRefresh.isRefreshing = false
             //adapter.messageList = it
             //adapter.notifyDataSetChanged()
             adapter.updateMessageList(it)
